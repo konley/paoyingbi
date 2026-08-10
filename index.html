@@ -12,11 +12,14 @@
   <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=20260809j">
   <link rel="manifest" href="/site.webmanifest">
   <title>抛硬币 · TOP | paoyingbi.top</title>
-  <link rel="stylesheet" href="/assets/style-scroll-atmosphere.css">
+  <link rel="stylesheet" href="/assets/style-day-night.css">
   <script>
     try {
+      var themeMode = localStorage.getItem("pyb-theme-mode");
       var savedTheme = localStorage.getItem("pyb-theme");
-      if (savedTheme === "dark") document.documentElement.dataset.theme = "dark";
+      var hour = new Date().getHours();
+      var automaticTheme = hour >= 7 && hour < 19 ? "light" : "dark";
+      document.documentElement.dataset.theme = themeMode === "manual" && savedTheme ? savedTheme : automaticTheme;
     } catch (_) {}
   </script>
 </head>
@@ -65,6 +68,7 @@
           <div><strong id="flip-count">0</strong><small>累计抛掷</small></div>
           <div><strong><span id="heads-ratio">50</span>%</strong><small>TOP 占比</small></div>
         </div>
+        <p class="latest-fate" id="latest-fate" aria-live="polite"><span>最近落定</span>「还未抛起。让硬币替犹豫先走一步。」</p>
       </div>
 
       <div class="coin-stage" id="coin-stage">
@@ -99,7 +103,6 @@
         <h2>不必匆忙，<br><b>先安顿这一页</b></h2>
         <p>有些网站急着展示自己，我们更愿意先留一扇安静的门——好看，也好玩，也足够把「来过」这件事记得温柔一点。</p>
       </div>
-      <div class="seal" aria-hidden="true"><strong>TOP</strong><span>PAOYINGBI</span></div>
     </section>
 
     <section class="interlude" aria-label="关于选择">
@@ -141,6 +144,6 @@
     <source src="/assets/audio/bgm.mp3" type="audio/mpeg">
   </audio>
   <script src="/assets/vendor/node_modules/matter-js/build/matter.min.js" defer></script>
-  <script src="/assets/app-scroll-atmosphere.js" defer></script>
+  <script src="/assets/app-living-page.js" defer></script>
 </body>
 </html>

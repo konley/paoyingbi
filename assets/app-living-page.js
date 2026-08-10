@@ -19,6 +19,7 @@
   const celebration = byId("celebration");
   const celebrationMark = byId("celebration-mark");
   const fateLine = byId("fate-line");
+  const latestFate = byId("latest-fate");
   const historyElement = byId("history");
   const fxCanvas = byId("fx-canvas");
   const fx = fxCanvas.getContext("2d");
@@ -766,7 +767,10 @@
     result.className = "result show " + chosenSide;
     const list = messages[chosenSide];
     const message = list[Math.floor(Math.random() * list.length)];
-    fateLine.textContent = "「" + message + "」";
+    const fate = "「" + message + "」";
+    fateLine.textContent = fate;
+    latestFate.lastChild.textContent = fate;
+    latestFate.dataset.side = chosenSide;
     if (!homeImpactPlayed) {
       // A wide throw returns through the settling animation, so the final impact belongs at home.
       playLanding(heads, .72);
@@ -775,7 +779,6 @@
       lastImpact = { x: 0, y: 0, source: "settle" };
     }
     celebrateResult(chosenSide);
-    showToast(message);
     history.unshift(chosenSide);
     history = history.slice(0, 12);
     try { localStorage.setItem("pyb-history", JSON.stringify(history)); } catch (_) {}
@@ -1005,6 +1008,21 @@
   coinControl.addEventListener("click", (event) => { if (event.detail === 0) launch(.5, 0); });
   flipButtons.forEach((button) => button.addEventListener("click", () => launch(.55, 0)));
 
+  function automaticTheme() {
+    const hour = new Date().getHours();
+    return hour >= 7 && hour < 19 ? "light" : "dark";
+  }
+
+  function applyTheme(theme, animate = true) {
+    if (root.dataset.theme === theme) return;
+    if (animate && !reducedMotion) root.classList.add("theme-shifting");
+    root.dataset.theme = theme;
+    updateThemeUi(theme);
+    document.querySelector('meta[name="theme-color"]').content = theme === "dark" ? "#0b1816" : "#edf3ef";
+    clearTimeout(applyTheme.timer);
+    applyTheme.timer = setTimeout(() => root.classList.remove("theme-shifting"), 760);
+  }
+
   function updateThemeUi(theme) {
     const dark = theme === "dark";
     themeToggle.setAttribute("aria-pressed", dark ? "true" : "false");
@@ -1014,10 +1032,11 @@
   updateThemeUi(root.dataset.theme);
   themeToggle.addEventListener("click", () => {
     const theme = root.dataset.theme === "dark" ? "light" : "dark";
-    root.dataset.theme = theme;
-    updateThemeUi(theme);
-    try { localStorage.setItem("pyb-theme", theme); } catch (_) {}
-    document.querySelector('meta[name="theme-color"]').content = theme === "dark" ? "#0b100e" : "#eef3f0";
+    applyTheme(theme);
+    try {
+      localStorage.setItem("pyb-theme", theme);
+      localStorage.setItem("pyb-theme-mode", "manual");
+    } catch (_) {}
   });
 
   soundToggle.setAttribute("aria-pressed", soundOn ? "true" : "false");
@@ -1157,7 +1176,12 @@
   renderHistory();
   paintStats(stats);
   updateClock();
-  setInterval(updateClock, 30000);
+  setInterval(() => {
+    updateClock();
+    try {
+      if (localStorage.getItem("pyb-theme-mode") !== "manual") applyTheme(automaticTheme());
+    } catch (_) { applyTheme(automaticTheme()); }
+  }, 30000);
   addEventListener("resize", handleResize, { passive: true });
   fetch("/api/stats").then((response) => response.json()).then((payload) => {
     if (payload && payload.ok && payload.data) {
