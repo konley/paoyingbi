@@ -12,7 +12,7 @@
   <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=20260809j">
   <link rel="manifest" href="/site.webmanifest">
   <title>抛硬币 · TOP | paoyingbi.top</title>
-  <link rel="stylesheet" href="/assets/style-feathered-scene.css">
+  <link rel="stylesheet" href="/assets/style-fate-note.css">
   <script>
     try {
       var themeMode = localStorage.getItem("pyb-theme-mode");
@@ -33,7 +33,6 @@
     <img class="active" id="scene-image-a" src="/assets/landscape.webp" alt="" width="2200" height="1238" fetchpriority="high">
     <img id="scene-image-b" alt="" width="2200" height="1238" decoding="async">
     <div class="scene-wash"></div>
-    <div class="scene-feather"></div>
   </div>
 
   <header class="topbar">
@@ -64,6 +63,7 @@
           <button class="primary" id="flip-btn" type="button"><span>抛向 TOP</span><small>按住拖动 · 松手抛出</small></button>
           <a class="secondary" href="#about">读懂意象</a>
         </div>
+        <p class="coin-status" id="coin-status" aria-live="polite"><span id="coin-status-label">READY</span><strong id="coin-status-title">按住硬币</strong><em id="coin-status-copy"></em></p>
         <div class="stats" aria-label="站点统计">
           <div><strong id="uptime-days">412</strong><small>已陪伴 / 天</small></div>
           <div><strong id="flip-count">0</strong><small>累计抛掷</small></div>
@@ -92,7 +92,6 @@
         </button>
         <div class="coin-shadow" aria-hidden="true"></div>
         <div class="result" id="result" aria-live="polite"></div>
-        <p class="coin-status" id="coin-status" aria-live="polite"><span id="coin-status-label">READY</span><strong id="coin-status-title">按住硬币</strong><em id="coin-status-copy"></em></p>
       </div>
     </section>
 
