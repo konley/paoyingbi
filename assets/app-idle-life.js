@@ -804,6 +804,14 @@
       setCoinTransform(driftX, driftY, coinOrientation);
       updateShadow(Math.max(0, -driftY), driftX);
       if (progress >= 1) finishReveal();
+    } else if (state === "idle" || state === "settled") {
+      // A low-amplitude, non-physical rest motion keeps the coin present without changing its result.
+      const phase = now * .00055;
+      const driftX = Math.sin(phase * .83) * 1.8 + Math.sin(phase * 1.71) * .45;
+      const driftY = Math.cos(phase * 1.07) * 3.4 - .8;
+      const tilt = quaternionFromEuler(Math.sin(phase * .94) * 1.6, Math.cos(phase * .76) * 2.2, Math.sin(phase * 1.4) * .55);
+      setCoinTransform(driftX, driftY, normalizeQuaternion(multiplyQuaternions(tilt, coinOrientation)));
+      updateShadow(Math.max(0, -driftY), driftX);
     }
   }
 
