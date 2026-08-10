@@ -82,6 +82,7 @@
   let firstImpactAt = 0;
   let lastRevealDuration = 0;
   let reveal = null;
+  let idleStartedAt = performance.now();
   let audioContext = null;
   let audioBus = null;
   let room = null;
@@ -713,6 +714,7 @@
     Body.setVelocity(coinBody, { x: 0, y: 0 });
     coinBody.collisionFilter.mask = 0xFFFFFFFF;
     collisionsArmed = true;
+    idleStartedAt = performance.now();
     setCoinTransform(0, 0, coinOrientation);
     coin.classList.remove("flipping");
     coin.classList.add("settled");
@@ -834,10 +836,12 @@
       if (progress >= 1) finishReveal();
     } else if (state === "idle" || state === "settled") {
       // A low-amplitude, non-physical rest motion keeps the coin present without changing its result.
-      const phase = now * .00078;
-      const driftX = Math.sin(phase * .83) * 5.2 + Math.sin(phase * 1.71) * 1.25;
-      const driftY = Math.cos(phase * 1.07) * 8.2 - 1.7;
-      const tilt = quaternionFromEuler(Math.sin(phase * .94) * 5.6, Math.cos(phase * .76) * 7.8, Math.sin(phase * 1.4) * 1.8);
+      const elapsed = Math.max(0, now - idleStartedAt);
+      const handoff = reducedMotion ? 1 : Math.min(1, elapsed / 540);
+      const phase = elapsed * .00078;
+      const driftX = (Math.sin(phase * .83) * 5.2 + Math.sin(phase * 1.71) * 1.25) * handoff;
+      const driftY = (Math.cos(phase * 1.07) * 8.2 - 1.7) * handoff;
+      const tilt = quaternionFromEuler(Math.sin(phase * .94) * 5.6 * handoff, Math.cos(phase * .76) * 7.8 * handoff, Math.sin(phase * 1.4) * 1.8 * handoff);
       setCoinTransform(driftX, driftY, normalizeQuaternion(multiplyQuaternions(tilt, coinOrientation)));
       updateShadow(Math.max(0, -driftY), driftX);
     }
@@ -943,6 +947,7 @@
     if (state === "settled") {
       coin.classList.add("settled");
       coinOrientation = orientationForSide(chosenSide);
+      idleStartedAt = performance.now();
       setCoinTransform(0, 0, coinOrientation);
       coinStatus.textContent = chosenSide === "heads" ? "TOP · 正面朝上" : "MOON · 反面朝上";
     } else {
@@ -1083,6 +1088,7 @@
     resizeFx();
     if (state === "settled") {
       coinOrientation = orientationForSide(chosenSide);
+      idleStartedAt = performance.now();
       setCoinTransform(0, 0, coinOrientation);
     } else {
       coin.style.transform = "";
