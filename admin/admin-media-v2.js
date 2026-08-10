@@ -11,8 +11,8 @@
     invalid_image: "无法识别这张图片",
     invalid_image_dimensions: "图片至少需要 640×360，且不能超过 4000 万像素",
     invalid_audio: "无法识别这个音频文件",
-    invalid_audio_duration: "音乐时长需要在 1 秒到 60 分钟之间",
-    unsupported_audio_format: "仅支持 MP3、OGG、Opus 和 M4A",
+    invalid_audio_duration: "音乐时长需要在 1 秒到 4 小时之间",
+    unsupported_audio_format: "仅支持 MP3、OGG、Opus、M4A、FLAC 和 WAV",
     bundled_media_cannot_be_deleted: "内置资源不能删除，可以将它关闭",
   };
 

@@ -12,7 +12,7 @@
   <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=20260809j">
   <link rel="manifest" href="/site.webmanifest">
   <title>抛硬币 · TOP | paoyingbi.top</title>
-  <link rel="stylesheet" href="/assets/style-day-night.css">
+  <link rel="stylesheet" href="/assets/style-result-panel.css">
   <script>
     try {
       var themeMode = localStorage.getItem("pyb-theme-mode");
@@ -68,7 +68,6 @@
           <div><strong id="flip-count">0</strong><small>累计抛掷</small></div>
           <div><strong><span id="heads-ratio">50</span>%</strong><small>TOP 占比</small></div>
         </div>
-        <p class="latest-fate" id="latest-fate" aria-live="polite"><span>最近落定</span>「还未抛起。让硬币替犹豫先走一步。」</p>
       </div>
 
       <div class="coin-stage" id="coin-stage">
@@ -92,7 +91,7 @@
         </button>
         <div class="coin-shadow" aria-hidden="true"></div>
         <div class="result" id="result" aria-live="polite"></div>
-        <p class="coin-status" id="coin-status">READY · 按住硬币</p>
+        <p class="coin-status" id="coin-status" aria-live="polite"><span id="coin-status-label">READY</span><strong id="coin-status-title">按住硬币</strong><em id="coin-status-copy"></em></p>
       </div>
     </section>
 
@@ -144,6 +143,6 @@
     <source src="/assets/audio/bgm.mp3" type="audio/mpeg">
   </audio>
   <script src="/assets/vendor/node_modules/matter-js/build/matter.min.js" defer></script>
-  <script src="/assets/app-living-page.js" defer></script>
+  <script src="/assets/app-result-panel.js" defer></script>
 </body>
 </html>

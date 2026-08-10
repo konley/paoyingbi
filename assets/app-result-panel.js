@@ -8,6 +8,9 @@
   const coinControl = byId("coin-control");
   const coinShadow = document.querySelector(".coin-shadow");
   const coinStatus = byId("coin-status");
+  const coinStatusLabel = byId("coin-status-label");
+  const coinStatusTitle = byId("coin-status-title");
+  const coinStatusCopy = byId("coin-status-copy");
   const result = byId("result");
   const flipButtons = [byId("flip-btn"), byId("flip-btn-2")].filter(Boolean);
   const themeToggle = byId("theme-toggle");
@@ -19,7 +22,6 @@
   const celebration = byId("celebration");
   const celebrationMark = byId("celebration-mark");
   const fateLine = byId("fate-line");
-  const latestFate = byId("latest-fate");
   const historyElement = byId("history");
   const fxCanvas = byId("fx-canvas");
   const fx = fxCanvas.getContext("2d");
@@ -30,7 +32,7 @@
   const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   if (!window.Matter) {
-    coinStatus.textContent = "物理引擎加载失败 · 请刷新";
+    setCoinStatus("ERROR", "物理引擎加载失败 · 请刷新");
     return;
   }
 
@@ -121,6 +123,19 @@
     if (!nextStats || Number(nextStats.total) < Number(stats.total)) return;
     stats = nextStats;
     paintStats(stats);
+  }
+
+  function setCoinStatus(label, title, copy = "", side = "") {
+    coinStatusLabel.textContent = label;
+    coinStatusTitle.textContent = title;
+    coinStatusCopy.textContent = copy;
+    coinStatus.dataset.side = side;
+    coinStatus.classList.toggle("is-result", !!copy);
+    if (copy && !reducedMotion) {
+      coinStatus.classList.remove("show-result");
+      void coinStatus.offsetWidth;
+      coinStatus.classList.add("show-result");
+    }
   }
 
   sceneImages[0].dataset.url = "/assets/landscape.webp";
@@ -683,7 +698,7 @@
     stage.classList.add("airborne");
     coin.classList.remove("settled", "dragging");
     coin.classList.add("flipping");
-    coinStatus.textContent = "IN THE AIR · 向上";
+    setCoinStatus("IN THE AIR", "向上");
     setBusy(true);
 
     const startX = Number(options.x) || 0;
@@ -727,7 +742,7 @@
       toOrientation: targetOrientation,
       wobbleAxis: normalizeVector({ x: .75 + Math.random() * .2, y: (Math.random() - .5) * .2, z: .2 + Math.random() * .2 }),
     };
-    coinStatus.textContent = "SETTLING · 落定";
+    setCoinStatus("SETTLING", "正在落定");
   }
 
   async function saveResult(side) {
@@ -762,15 +777,12 @@
     coin.classList.remove("flipping");
     coin.classList.add("settled");
     stage.classList.remove("airborne");
-    coinStatus.textContent = heads ? "TOP · 正面朝上" : "MOON · 反面朝上";
-    result.textContent = heads ? "✦ TOP · 正面" : "☾ 月 · 反面";
-    result.className = "result show " + chosenSide;
     const list = messages[chosenSide];
     const message = list[Math.floor(Math.random() * list.length)];
-    const fate = "「" + message + "」";
-    fateLine.textContent = fate;
-    latestFate.lastChild.textContent = fate;
-    latestFate.dataset.side = chosenSide;
+    setCoinStatus(heads ? "TOP · 正面" : "MOON · 反面", heads ? "正面朝上" : "反面朝上", message, chosenSide);
+    result.textContent = heads ? "✦ TOP · 正面" : "☾ 月 · 反面";
+    result.className = "result show " + chosenSide;
+    fateLine.textContent = "「" + message + "」";
     if (!homeImpactPlayed) {
       // A wide throw returns through the settling animation, so the final impact belongs at home.
       playLanding(heads, .72);
@@ -919,7 +931,7 @@
     coin.classList.add("dragging");
     stage.classList.add("aiming");
     result.classList.remove("show");
-    coinStatus.textContent = "DRAG · 拖动硬币";
+    setCoinStatus("DRAG", "拖动硬币");
     flipButtons.forEach((button) => { button.disabled = true; });
     coinControl.setAttribute("aria-grabbed", "true");
     try { coinControl.setPointerCapture(event.pointerId); } catch (_) {}
@@ -938,7 +950,7 @@
     const now = performance.now();
     pointer.samples.push({ x: event.clientX, y: event.clientY, at: now });
     pointer.samples = pointer.samples.filter((sample) => now - sample.at <= 140);
-    if (pointer.maxDistance > 8) coinStatus.textContent = "AIM · 松手弹射";
+    if (pointer.maxDistance > 8) setCoinStatus("AIM", "松手抛出");
   }
 
   function pointerUp(event) {
@@ -994,10 +1006,10 @@
       coinOrientation = orientationForSide(chosenSide);
       idleStartedAt = performance.now();
       setCoinTransform(0, 0, coinOrientation);
-      coinStatus.textContent = chosenSide === "heads" ? "TOP · 正面朝上" : "MOON · 反面朝上";
+      setCoinStatus(chosenSide === "heads" ? "TOP · 正面" : "MOON · 反面", chosenSide === "heads" ? "正面朝上" : "反面朝上");
     } else {
       coin.style.transform = "";
-      coinStatus.textContent = "READY · 按住硬币";
+      setCoinStatus("READY", "按住硬币");
     }
   }
 

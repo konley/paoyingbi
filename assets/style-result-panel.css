@@ -179,10 +179,22 @@ h1 b, h2 b { color: var(--gold); font-weight: inherit; }
 @keyframes moteFloatB { 0%,100% { translate: 0 0; opacity: .35; } 50% { translate: -14px 13px; opacity: .95; } }
 @keyframes moteFloatC { 0%,100% { translate: 0 0; opacity: .25; } 50% { translate: 13px 8px; opacity: .9; } }
 .coin-shadow { position: absolute; left: 50%; top: calc(50% + 160px); width: 145px; height: 22px; border-radius: 50%; background: rgba(28,37,33,.2); filter: blur(11px); transform: translateX(-50%); }
-.coin-status { position: absolute; bottom: 23px; margin: 0; padding: 7px 12px 6px; border: 1px solid rgba(112,71,0,.28); border-radius: 999px; background: rgba(250,249,239,.72); color: #604100; font: 800 .76rem/1.1 var(--serif); letter-spacing: .1em; text-shadow: 0 1px 0 rgba(255,255,255,.84); box-shadow: 0 2px 0 rgba(112,71,0,.09); backdrop-filter: blur(5px); }
-[data-theme="dark"] .coin-status { border-color: rgba(240,202,104,.36); background: rgba(9,17,13,.68); color: #f0ca68; text-shadow: 0 1px 0 #000; box-shadow: 0 2px 0 rgba(0,0,0,.34); }
-.coin-status::before { content: ""; display: inline-block; width: 6px; height: 6px; margin: 0 7px 1px 0; border-radius: 50%; background: var(--gold); vertical-align: middle; }
-.coin-status:not(:empty) { min-width: 152px; text-align: center; }
+.coin-status { position: absolute; z-index: 4; bottom: 14px; width: min(340px, calc(100% - 24px)); margin: 0; padding: 9px 13px 10px; border: 1px solid rgba(112,71,0,.25); border-radius: 12px 4px 12px 12px; background: rgba(250,249,239,.78); color: #604100; text-align: left; text-shadow: 0 1px 0 rgba(255,255,255,.84); box-shadow: 0 3px 0 rgba(112,71,0,.08); backdrop-filter: blur(8px); }
+.coin-status > span { display: block; margin-bottom: 3px; color: var(--gold-dark); font: 800 .58rem/1 Georgia, serif; letter-spacing: .16em; }
+.coin-status > span::before { content: ""; display: inline-block; width: 6px; height: 6px; margin: 0 7px 1px 0; border-radius: 50%; background: var(--gold); vertical-align: middle; }
+.coin-status strong { display: block; color: var(--text); font: 800 .93rem/1.18 var(--serif); letter-spacing: .04em; }
+.coin-status em { display: none; margin-top: 5px; color: var(--muted); font: 600 .76rem/1.55 var(--serif); font-style: normal; letter-spacing: .01em; }
+.coin-status.is-result { padding: 11px 14px 12px; border-color: rgba(196,134,0,.5); box-shadow: 0 5px 16px rgba(112,71,0,.12), 0 2px 0 rgba(112,71,0,.12); }
+.coin-status.is-result strong { color: var(--gold-dark); font-size: 1.08rem; }
+.coin-status.is-result em { display: block; }
+.coin-status[data-side="tails"] { border-color: rgba(49,84,155,.48); }
+.coin-status[data-side="tails"] > span, .coin-status[data-side="tails"].is-result strong { color: var(--blue); }
+.coin-status[data-side="tails"] > span::before { background: var(--blue); }
+[data-theme="dark"] .coin-status { border-color: rgba(240,202,104,.32); background: rgba(9,22,20,.8); color: #f0ca68; text-shadow: 0 1px 0 #000; box-shadow: 0 3px 0 rgba(0,0,0,.34); }
+[data-theme="dark"] .coin-status strong { color: #f4f8f5; }
+[data-theme="dark"] .coin-status em { color: #b6c4bd; }
+@keyframes resultArrival { 0% { opacity: 0; transform: translateY(12px) scale(.96); } 62% { opacity: 1; transform: translateY(-2px) scale(1.01); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+.coin-status.show-result { animation: resultArrival .58s cubic-bezier(.18,.78,.25,1) both; }
 .result { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; border: 0; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
 .result.show { opacity: 0; }
 @keyframes float { 0%,100% { transform: translateY(0) rotateX(7deg) rotateY(0); } 50% { transform: translateY(-10px) rotateX(9deg) rotateY(7deg); } }
@@ -298,7 +310,11 @@ footer { position: relative; z-index: 2; width: min(1160px, calc(100% - 40px)); 
   .coin-code { font-size: .32rem; }
 
   .coin-shadow { top: calc(50% + 140px); }
-  .coin-status { bottom: 12px; padding: 7px 10px 6px; font-size: .7rem; }
+  .coin-status { bottom: 7px; width: min(328px, calc(100% - 20px)); padding: 8px 11px 9px; }
+  .coin-status > span { font-size: .54rem; }
+  .coin-status strong { font-size: .86rem; }
+  .coin-status.is-result strong { font-size: 1rem; }
+  .coin-status em { font-size: .71rem; }
   .result { bottom: 45px; font-size: .78rem; }
   .eyebrow { margin-bottom: 12px; font-size: .67rem; }
   h1 { margin-bottom: 18px; font-size: clamp(3.8rem, 18vw, 5.2rem); }
@@ -464,12 +480,7 @@ main::after { left: -22%; top: 68%; transform: rotate(21deg); border-color: rgba
 }
 [data-theme="dark"] .interlude::after { border-color: rgba(181,204,240,.2); box-shadow: inset 16px 0 0 -15px rgba(181,204,240,.16), 0 0 0 16px rgba(181,204,240,.035); }
 
-.latest-fate { max-width: 510px; margin: 20px 0 0; padding: 10px 0 0 13px; border-left: 2px solid var(--gold); color: var(--muted); font: 600 .83rem/1.7 var(--serif); letter-spacing: .015em; transition: color .55s ease, border-color .55s ease, transform .35s ease; }
-.latest-fate span { display: block; margin-bottom: 3px; color: var(--gold-dark); font: 800 .62rem/1 Georgia, serif; letter-spacing: .15em; text-transform: uppercase; }
-.latest-fate[data-side="tails"] { border-left-color: var(--blue); }
-.latest-fate[data-side="tails"] span { color: var(--blue); }
-
-html, body, .scene-wash, .tool, .latest-fate, .coin-status, .ambient-canvas, main::before, main::after, .interlude::after { transition: background .72s ease, background-color .72s ease, color .55s ease, border-color .55s ease, box-shadow .72s ease, opacity .55s ease, filter .72s ease; }
+html, body, .scene-wash, .tool, .coin-status, .ambient-canvas, main::before, main::after, .interlude::after { transition: background .72s ease, background-color .72s ease, color .55s ease, border-color .55s ease, box-shadow .72s ease, opacity .55s ease, filter .72s ease; }
 html.theme-shifting .scene img { transform: scale(1.045); }
 html.theme-shifting .ambient-canvas { opacity: .28; }
 html.theme-shifting main::before, html.theme-shifting main::after, html.theme-shifting .interlude::after { opacity: .35; }

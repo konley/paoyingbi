@@ -26,6 +26,8 @@ from mutagen.mp3 import MP3
 from mutagen.mp4 import MP4
 from mutagen.oggopus import OggOpus
 from mutagen.oggvorbis import OggVorbis
+from mutagen.flac import FLAC
+from mutagen.wave import WAVE
 from PIL import Image, ImageOps, UnidentifiedImageError
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 from starlette.middleware.trustedhost import TrustedHostMiddleware
@@ -48,7 +50,7 @@ SESSION_IDLE_SECONDS = 30 * 60
 SESSION_ABSOLUTE_SECONDS = 12 * 60 * 60
 MAX_UPLOAD_BYTES = 30 * 1024 * 1024
 MAX_IMAGE_PIXELS = 40_000_000
-MAX_AUDIO_SECONDS = 60 * 60
+MAX_AUDIO_SECONDS = 4 * 60 * 60
 MAX_BACKGROUND_EDGE = 2560
 THUMBNAIL_EDGE = 480
 CONFIG_LOCK = threading.RLock()
@@ -418,6 +420,10 @@ def process_audio(temporary: Path, media_id: str) -> str:
             extension = ".opus"
         elif isinstance(parsed, MP4):
             extension = ".m4a"
+        elif isinstance(parsed, FLAC):
+            extension = ".flac"
+        elif isinstance(parsed, WAVE):
+            extension = ".wav"
         else:
             raise HTTPException(status_code=415, detail="unsupported_audio_format")
         final_path = UPLOAD_ROOT / "audio" / f"{media_id}{extension}"
@@ -574,13 +580,21 @@ def upload_media(
     upload: Annotated[UploadFile, File()],
     name: Annotated[str, Form(max_length=120)] = "",
 ) -> SiteSettings:
-    temporary, _ = stream_upload(upload)
+    try:
+        temporary, _ = stream_upload(upload)
+    except HTTPException as error:
+        LOGGER.info("Upload rejected: kind=%s reason=%s", kind, error.detail)
+        raise
     media_id = uuid.uuid4().hex
     thumbnail_url = None
-    if kind == "background":
-        public_url, thumbnail_url = process_image(temporary, media_id)
-    else:
-        public_url = process_audio(temporary, media_id)
+    try:
+        if kind == "background":
+            public_url, thumbnail_url = process_image(temporary, media_id)
+        else:
+            public_url = process_audio(temporary, media_id)
+    except HTTPException as error:
+        LOGGER.info("Upload rejected: kind=%s reason=%s", kind, error.detail)
+        raise
     item = MediaItem(
         id=media_id,
         kind=kind,
