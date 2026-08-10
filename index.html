@@ -12,7 +12,7 @@
   <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=20260809j">
   <link rel="manifest" href="/site.webmanifest">
   <title>抛硬币 · TOP | paoyingbi.top</title>
-  <link rel="stylesheet" href="/assets/style-metal-title.css">
+  <link rel="stylesheet" href="/assets/style-art-fate.css">
   <script>
     try {
       var themeMode = localStorage.getItem("pyb-theme-mode");
@@ -57,17 +57,17 @@
     <section class="hero" id="home">
       <div class="hero-copy">
         <p class="eyebrow"><i></i> paoyingbi.top · 抛起见顶</p>
-        <h1><span>抛起</span><span>见<b>顶</b></span></h1>
+        <h1 class="hero-title" aria-label="抛起见顶"><span class="title-line"><i>抛</i><i>起</i></span><span class="title-line title-line-b"><i>见</i><b>顶</b></span></h1>
         <p class="lede">有些答案不适合被追问，只适合被抛向空中。让它旋转、失重，再在掌心之外，安静地选择一面。</p>
         <div class="actions">
           <button class="primary" id="flip-btn" type="button"><span>抛向 TOP</span><small>按住拖动 · 松手抛出</small></button>
           <a class="secondary" href="#about">读懂意象</a>
         </div>
         <p class="coin-status" id="coin-status" aria-live="polite"><span id="coin-status-label">READY</span><strong id="coin-status-title">按住硬币</strong><em id="coin-status-copy"></em></p>
-        <div class="stats" aria-label="站点统计">
-          <div><strong id="uptime-days">412</strong><small>已陪伴 / 天</small></div>
-          <div><strong id="flip-count">0</strong><small>累计抛掷</small></div>
-          <div><strong><span id="heads-ratio">50</span>%</strong><small>TOP 占比</small></div>
+        <div class="stats is-loading" aria-label="站点统计" aria-busy="true">
+          <div><strong id="uptime-days">&nbsp;</strong><small>已陪伴 / 天</small></div>
+          <div><strong id="flip-count">&nbsp;</strong><small>累计抛掷</small></div>
+          <div><strong><span id="heads-ratio">&nbsp;</span>%</strong><small>TOP 占比</small></div>
         </div>
       </div>
 
@@ -123,8 +123,8 @@
         <blockquote id="fate-line">「域名写着 top，硬币却仍有反面。向上，从不拒绝犹豫。」</blockquote>
       </div>
       <div class="ledger-panel">
-        <div class="bar-row"><span>TOP</span><div><i id="bar-heads"></i></div><strong id="heads-count">0</strong></div>
-        <div class="bar-row tails"><span>月</span><div><i id="bar-tails"></i></div><strong id="tails-count">0</strong></div>
+        <div class="bar-row"><span>TOP</span><div><i id="bar-heads"></i></div><strong id="heads-count">&nbsp;</strong></div>
+        <div class="bar-row tails"><span>月</span><div><i id="bar-tails"></i></div><strong id="tails-count">&nbsp;</strong></div>
         <div class="history" id="history" aria-label="最近抛掷结果"></div>
         <button class="primary compact" id="flip-btn-2" type="button">再抛一次</button>
       </div>
@@ -143,6 +143,6 @@
     <source src="/assets/audio/bgm.mp3" type="audio/mpeg">
   </audio>
   <script src="/assets/vendor/node_modules/matter-js/build/matter.min.js" defer></script>
-  <script src="/assets/app-result-panel.js" defer></script>
+  <script src="/assets/app-art-fate.js" defer></script>
 </body>
 </html>
