@@ -24,6 +24,8 @@
   const fx = fxCanvas.getContext("2d");
   const ambientCanvas = byId("ambient-canvas");
   const ambient = ambientCanvas.getContext("2d");
+  const cursorDot = byId("cursor-dot");
+  const cursorRing = byId("cursor-ring");
   const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   if (!window.Matter) {
@@ -94,6 +96,8 @@
   let particles = [];
   let rings = [];
   let ambientMotes = [];
+  let ambientRibbons = [];
+  let ambientWorldHeight = 0;
   let backgroundItems = [{ name: "林间晴光", url: "/assets/landscape.webp" }];
   let backgroundMode = "single";
   let backgroundIndex = 0;
@@ -289,20 +293,27 @@
     fxCanvas.style.width = width + "px";
     fxCanvas.style.height = height + "px";
     fx.setTransform(ratio, 0, 0, ratio, 0, 0);
-    const sceneRect = document.querySelector(".scene").getBoundingClientRect();
-    ambientCanvas.width = Math.round(sceneRect.width * ratio);
-    ambientCanvas.height = Math.round(sceneRect.height * ratio);
-    ambientCanvas.style.width = sceneRect.width + "px";
-    ambientCanvas.style.height = sceneRect.height + "px";
+    ambientCanvas.width = Math.round(width * ratio);
+    ambientCanvas.height = Math.round(innerHeight * ratio);
+    ambientCanvas.style.width = width + "px";
+    ambientCanvas.style.height = innerHeight + "px";
     ambient.setTransform(ratio, 0, 0, ratio, 0, 0);
-    const count = reducedMotion ? 20 : Math.round(Math.min(68, Math.max(34, sceneRect.width / 24)));
+    ambientWorldHeight = height;
+    const count = reducedMotion ? 36 : Math.round(Math.min(118, Math.max(64, width / 15)));
     ambientMotes = Array.from({ length: count }, () => ({
-      x: Math.random() * sceneRect.width,
-      y: Math.random() * sceneRect.height,
+      x: Math.random() * width,
+      worldY: Math.random() * ambientWorldHeight,
       depth: .25 + Math.random() * .75,
       phase: Math.random() * Math.PI * 2,
-      drift: .05 + Math.random() * .19,
+      drift: .025 + Math.random() * .12,
+      shape: Math.random() > .82 ? "diamond" : "dot",
     }));
+    ambientRibbons = [
+      { x: width * .09, worldY: height * .27, width: width * .23, turn: -1.2 },
+      { x: width * .76, worldY: height * .46, width: width * .2, turn: .9 },
+      { x: width * .16, worldY: height * .7, width: width * .26, turn: 1.1 },
+      { x: width * .8, worldY: height * .86, width: width * .17, turn: -1 },
+    ];
   }
 
   function coinScreenCenter() {
@@ -406,22 +417,53 @@
     const height = ambientCanvas.clientHeight;
     ambient.clearRect(0, 0, width, height);
     const dark = root.dataset.theme === "dark";
+    const scroll = scrollY;
+    const motion = reducedMotion ? 0 : 1;
+    ambient.save();
+    for (const ribbon of ambientRibbons) {
+      const y = ribbon.worldY - scroll;
+      if (y < -220 || y > height + 220) continue;
+      ambient.strokeStyle = dark ? "rgba(125,160,205,.11)" : "rgba(121,105,49,.1)";
+      ambient.lineWidth = 1;
+      ambient.beginPath();
+      ambient.moveTo(ribbon.x - ribbon.width, y + 45);
+      ambient.bezierCurveTo(ribbon.x - ribbon.width * .32, y - 50 * ribbon.turn, ribbon.x + ribbon.width * .26, y + 54 * ribbon.turn, ribbon.x + ribbon.width, y - 28);
+      ambient.stroke();
+      if (dark) {
+        ambient.strokeStyle = "rgba(226,186,93,.08)";
+        ambient.beginPath();
+        ambient.ellipse(ribbon.x, y, ribbon.width * .32, ribbon.width * .1, ribbon.turn * .45, .2, Math.PI * 1.78);
+        ambient.stroke();
+      }
+    }
     for (const mote of ambientMotes) {
       const time = now * .00018 + mote.phase;
-      mote.x += Math.sin(time * 1.2) * mote.drift;
-      mote.y += Math.cos(time * .7) * mote.drift * .35;
+      mote.x += Math.sin(time * 1.2) * mote.drift * motion;
+      mote.worldY += Math.cos(time * .7) * mote.drift * .35 * motion;
       if (mote.x < -8) mote.x = width + 8;
       if (mote.x > width + 8) mote.x = -8;
-      if (mote.y < -8) mote.y = height + 8;
-      if (mote.y > height + 8) mote.y = -8;
-      const shimmer = .35 + Math.sin(time * 2.2) * .18;
+      if (mote.worldY < 0) mote.worldY = ambientWorldHeight;
+      if (mote.worldY > ambientWorldHeight) mote.worldY = 0;
+      const y = mote.worldY - scroll;
+      if (y < -12 || y > height + 12) continue;
+      const progress = mote.worldY / Math.max(1, ambientWorldHeight);
+      const shimmer = .46 + Math.sin(time * 2.2) * .28;
       const radius = dark ? (.45 + mote.depth * .9) : (.55 + mote.depth * 1.35);
-      const alpha = (dark ? .17 : .11) * mote.depth * shimmer;
-      ambient.fillStyle = dark ? `rgba(157,190,235,${alpha})` : `rgba(187,130,25,${alpha})`;
+      const alpha = (dark ? .26 : .17) * mote.depth * shimmer * (.6 + progress * .4);
+      ambient.fillStyle = dark ? `rgba(161,194,235,${alpha})` : `rgba(178,130,38,${alpha})`;
       ambient.beginPath();
-      ambient.arc(mote.x, mote.y, radius, 0, Math.PI * 2);
+      if (mote.shape === "diamond" && !dark) {
+        ambient.moveTo(mote.x, y - radius * 1.6);
+        ambient.lineTo(mote.x + radius, y);
+        ambient.lineTo(mote.x, y + radius * 1.6);
+        ambient.lineTo(mote.x - radius, y);
+        ambient.closePath();
+      } else {
+        ambient.arc(mote.x, y, radius, 0, Math.PI * 2);
+      }
       ambient.fill();
     }
+    ambient.restore();
     requestAnimationFrame(drawAmbient);
   }
 
@@ -1066,6 +1108,19 @@
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden && musicWanted && bgm.paused) attemptMusic();
   });
+
+  if (matchMedia("(pointer: fine)").matches) {
+    root.classList.add("cursor-enabled");
+    addEventListener("pointermove", (event) => {
+      cursorDot.style.transform = `translate3d(${event.clientX}px,${event.clientY}px,0)`;
+      cursorRing.style.transform = `translate3d(${event.clientX}px,${event.clientY}px,0)`;
+      const interactive = event.target.closest && event.target.closest("a, button, input, select, label");
+      root.classList.toggle("cursor-active", !!interactive);
+      root.classList.add("cursor-visible");
+    }, { passive: true });
+    addEventListener("blur", () => root.classList.remove("cursor-visible"));
+    document.addEventListener("mouseleave", () => root.classList.remove("cursor-visible"));
+  }
 
   function updateClock() {
     const now = new Date();

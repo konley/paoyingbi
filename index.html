@@ -12,7 +12,7 @@
   <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=20260809j">
   <link rel="manifest" href="/site.webmanifest">
   <title>抛硬币 · TOP | paoyingbi.top</title>
-  <link rel="stylesheet" href="/assets/style-status.css">
+  <link rel="stylesheet" href="/assets/style-scroll-atmosphere.css">
   <script>
     try {
       var savedTheme = localStorage.getItem("pyb-theme");
@@ -21,6 +21,7 @@
   </script>
 </head>
 <body>
+  <canvas class="ambient-canvas" id="ambient-canvas" aria-hidden="true"></canvas>
   <canvas class="fx-canvas" id="fx-canvas" aria-hidden="true"></canvas>
   <div class="celebration" id="celebration" aria-hidden="true">
     <i></i><i></i><i></i><span id="celebration-mark">✦</span>
@@ -28,7 +29,6 @@
   <div class="scene" aria-hidden="true">
     <img class="active" id="scene-image-a" src="/assets/landscape.webp" alt="" width="2200" height="1238" fetchpriority="high">
     <img id="scene-image-b" alt="" width="2200" height="1238" decoding="async">
-    <canvas class="ambient-canvas" id="ambient-canvas"></canvas>
     <div class="scene-wash"></div>
   </div>
 
@@ -134,11 +134,13 @@
     <time id="clock"></time>
   </footer>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="cursor-dot" id="cursor-dot" aria-hidden="true"></div>
+  <div class="cursor-ring" id="cursor-ring" aria-hidden="true"></div>
   <audio id="bgm" preload="auto" autoplay playsinline>
     <source src="/assets/audio/bgm.ogg" type="audio/ogg; codecs=opus">
     <source src="/assets/audio/bgm.mp3" type="audio/mpeg">
   </audio>
   <script src="/assets/vendor/node_modules/matter-js/build/matter.min.js" defer></script>
-  <script src="/assets/app-settle-handoff.js" defer></script>
+  <script src="/assets/app-scroll-atmosphere.js" defer></script>
 </body>
 </html>
