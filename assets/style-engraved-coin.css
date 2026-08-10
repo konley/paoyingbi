@@ -508,3 +508,45 @@ h1 b, h2 b { color: var(--gold); }
   .brand small { color: var(--muted); text-shadow: 0 1px 0 rgba(255,255,255,.68); }
   [data-theme="dark"] .brand strong, [data-theme="dark"] .brand small { text-shadow: 0 1px 0 #000; }
 }
+
+/* Coin engraving: narrow milled edge, radial lathe marks, and dark pressed lettering. */
+.coin-face {
+  border-width: 6px;
+  background:
+    radial-gradient(ellipse at 27% 18%, rgba(255,255,255,.88) 0 4%, rgba(255,255,255,.28) 15%, transparent 29%) padding-box,
+    radial-gradient(circle at 76% 78%, rgba(105,61,0,.29), transparent 38%) padding-box,
+    repeating-radial-gradient(circle at 50% 50%, transparent 0 5px, rgba(103,68,7,.065) 5px 5.65px) padding-box,
+    radial-gradient(circle at 37% 28%, #fffdf2 0%, #f8e9ae 34%, #e7bd55 65%, #bd7a0a 100%) padding-box,
+    repeating-conic-gradient(from 2deg, #ffe8a0 0 .22deg, #96701d .22deg .44deg, #e8c565 .44deg .66deg, #805a0d .66deg .88deg) border-box;
+  box-shadow: inset 0 0 0 1px rgba(255,253,218,.96), inset 0 0 0 4px #596b99, inset 0 0 0 5px rgba(255,229,135,.8), inset -15px -19px 25px rgba(80,48,0,.25), 0 14px 24px rgba(17,35,27,.18), 0 0 0 1px rgba(255,255,255,.35);
+}
+.coin-tails {
+  background:
+    radial-gradient(ellipse at 27% 18%, rgba(255,255,255,.86) 0 4%, rgba(255,255,255,.25) 15%, transparent 29%) padding-box,
+    radial-gradient(circle at 76% 78%, rgba(33,50,113,.3), transparent 38%) padding-box,
+    repeating-radial-gradient(circle at 50% 50%, transparent 0 5px, rgba(49,64,118,.075) 5px 5.65px) padding-box,
+    radial-gradient(circle at 37% 28%, #faffff 0%, #d8edf0 34%, #aab9df 65%, #6871ad 100%) padding-box,
+    repeating-conic-gradient(from 2deg, #dcf4e9 0 .22deg, #739ca7 .22deg .44deg, #c5e2db .44deg .66deg, #506b91 .66deg .88deg) border-box;
+  box-shadow: inset 0 0 0 1px rgba(246,255,254,.96), inset 0 0 0 4px #475889, inset 0 0 0 5px rgba(207,238,233,.82), inset -15px -19px 25px rgba(31,44,96,.28), 0 14px 24px rgba(17,35,27,.16), 0 0 0 1px rgba(255,255,255,.3);
+}
+.coin-face::before { inset: 11%; border-color: rgba(44,64,121,.38); background: repeating-radial-gradient(circle, transparent 0 4px, rgba(255,255,255,.12) 4px 4.6px), radial-gradient(circle at 50% 50%, transparent 57%, rgba(43,64,125,.1) 73%, transparent 79%); }
+.coin-rim { inset: 13px; border-style: dotted; border-color: rgba(43,60,112,.56); }
+.coin-lathe { border-color: rgba(40,60,119,.38); box-shadow: 0 0 0 2px rgba(255,255,255,.16), inset 0 0 13px rgba(255,255,255,.24); }
+.coin-face strong { color: #1d3f86; letter-spacing: .025em; text-shadow: 0 1px 0 rgba(255,255,255,.92), 0 2px 0 rgba(24,53,111,.22); }
+.coin-tails strong { color: #25477f; }
+.coin-face small, .coin-code { color: rgba(29,59,121,.8); font-weight: 800; text-shadow: 0 1px 0 rgba(255,255,255,.72); }
+.spark, .moon-mark { text-shadow: 0 1px 0 rgba(255,255,255,.86); }
+.coin-edge i {
+  background:
+    repeating-conic-gradient(from 0deg, rgba(255,238,158,.28) 0 .24deg, rgba(34,45,71,.2) .24deg .5deg, transparent .5deg .86deg),
+    repeating-radial-gradient(circle at 50% 50%, rgba(255,255,255,.1) 0 .7px, transparent .7px 2px),
+    radial-gradient(circle at 30% 24%, #ecd888 0 6%, #9c8039 42%, #44516f 78%, #26324c 100%);
+}
+.coin-edge i:nth-child(odd) { background:
+    repeating-conic-gradient(from 1deg, rgba(255,238,158,.23) 0 .22deg, rgba(33,44,67,.23) .22deg .48deg, transparent .48deg .84deg),
+    repeating-radial-gradient(circle at 50% 50%, rgba(255,255,255,.08) 0 .7px, transparent .7px 2px),
+    radial-gradient(circle at 68% 30%, #c0a75d 0 8%, #5d6a85 49%, #303c58 100%);
+}
+[data-theme="dark"] .coin-face, [data-theme="dark"] .coin-tails { box-shadow: inset 0 0 0 1px rgba(255,250,209,.9), inset 0 0 0 4px #53678f, inset 0 0 0 5px rgba(237,219,139,.72), inset -15px -19px 25px rgba(0,0,0,.3), 0 16px 28px rgba(0,0,0,.46); }
+[data-theme="dark"] .coin-face strong, [data-theme="dark"] .coin-tails strong { color: #16346f; text-shadow: 0 1px 0 rgba(255,255,255,.72), 0 2px 0 rgba(22,45,97,.24); }
+[data-theme="dark"] .coin-face small, [data-theme="dark"] .coin-code { color: rgba(18,50,106,.88); text-shadow: 0 1px 0 rgba(255,255,255,.58); }
