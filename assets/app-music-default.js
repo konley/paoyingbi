@@ -22,6 +22,8 @@
   const historyElement = byId("history");
   const fxCanvas = byId("fx-canvas");
   const fx = fxCanvas.getContext("2d");
+  const ambientCanvas = byId("ambient-canvas");
+  const ambient = ambientCanvas.getContext("2d");
   const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   if (!window.Matter) {
@@ -90,6 +92,7 @@
   let history = [];
   let particles = [];
   let rings = [];
+  let ambientMotes = [];
   let backgroundItems = [{ name: "林间晴光", url: "/assets/landscape.webp" }];
   let backgroundMode = "single";
   let backgroundIndex = 0;
@@ -285,6 +288,20 @@
     fxCanvas.style.width = width + "px";
     fxCanvas.style.height = height + "px";
     fx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    const sceneRect = document.querySelector(".scene").getBoundingClientRect();
+    ambientCanvas.width = Math.round(sceneRect.width * ratio);
+    ambientCanvas.height = Math.round(sceneRect.height * ratio);
+    ambientCanvas.style.width = sceneRect.width + "px";
+    ambientCanvas.style.height = sceneRect.height + "px";
+    ambient.setTransform(ratio, 0, 0, ratio, 0, 0);
+    const count = reducedMotion ? 20 : Math.round(Math.min(68, Math.max(34, sceneRect.width / 24)));
+    ambientMotes = Array.from({ length: count }, () => ({
+      x: Math.random() * sceneRect.width,
+      y: Math.random() * sceneRect.height,
+      depth: .25 + Math.random() * .75,
+      phase: Math.random() * Math.PI * 2,
+      drift: .05 + Math.random() * .19,
+    }));
   }
 
   function coinScreenCenter() {
@@ -314,51 +331,38 @@
   function impactFx(power) {
     if (reducedMotion) return;
     const center = coinScreenCenter();
-    const particleCount = Math.round(12 + 18 * power);
+    const particleCount = Math.round(7 + 10 * power);
     for (let i = 0; i < particleCount; i++) {
-      const angle = Math.random() * Math.PI * 2;
-      const speed = (2 + Math.random() * 5) * power;
+      const direction = Math.random() > .5 ? 1 : -1;
+      const speed = (1.2 + Math.random() * 3.2) * power;
       particles.push({
         x: center.x,
         y: center.y + coinRadius * .55,
-        vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed - 1.2,
+        vx: direction * speed,
+        vy: -(.45 + Math.random() * 1.3) * power,
         life: 1,
-        decay: .018 + Math.random() * .025,
-        size: 1.2 + Math.random() * 3.5,
-        color: Math.random() > .32 ? "229,177,53" : "96,167,194",
+        decay: .035 + Math.random() * .028,
+        size: .7 + Math.random() * 1.5,
+        color: Math.random() > .4 ? "196,134,0" : "49,84,155",
       });
     }
-    rings.push({ x: center.x, y: center.y + coinRadius * .64, radius: 8, life: 1 });
+    rings.push({ x: center.x, y: center.y + coinRadius * .64, radius: 14, life: 1 });
   }
 
   function celebrateResult(side) {
-    const rect = coinControl.getBoundingClientRect();
-    const viewportX = rect.left + rect.width / 2;
-    const viewportY = rect.top + rect.height / 2;
-    celebration.style.setProperty("--burst-x", viewportX + "px");
-    celebration.style.setProperty("--burst-y", viewportY + "px");
-    celebrationMark.textContent = side === "heads" ? "✦" : "☾";
-    celebration.className = "celebration " + side;
-    void celebration.offsetWidth;
-    celebration.classList.add("show");
-    clearTimeout(celebrateResult.timer);
-    celebrateResult.timer = setTimeout(() => celebration.classList.remove("show"), 1650);
-
     if (reducedMotion) return;
     const center = coinScreenCenter();
-    const colors = side === "heads" ? ["229,177,53", "224,139,180", "45,141,101"] : ["96,172,194", "82,103,163", "229,177,53"];
-    for (let i = 0; i < 96; i++) {
-      const angle = Math.random() * Math.PI * 2;
-      const speed = 2.5 + Math.random() * 8;
+    const colors = side === "heads" ? ["196,134,0", "8,123,82"] : ["49,84,155", "90,139,183"];
+    for (let i = 0; i < 18; i++) {
+      const direction = Math.random() > .5 ? 1 : -1;
       particles.push({
-        x: center.x,
-        y: center.y,
-        vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed - 1.4,
+        x: center.x + (Math.random() - .5) * coinRadius * .7,
+        y: center.y + coinRadius * .36,
+        vx: direction * (.7 + Math.random() * 2.5),
+        vy: -(.4 + Math.random() * 1.6),
         life: 1,
-        decay: .012 + Math.random() * .02,
-        size: 1.2 + Math.random() * 4.2,
+        decay: .035 + Math.random() * .024,
+        size: .6 + Math.random() * 1.5,
         color: colors[Math.floor(Math.random() * colors.length)],
       });
     }
@@ -372,21 +376,21 @@
       particle.x += particle.vx;
       particle.y += particle.vy;
       particle.vx *= .985;
-      particle.vy = particle.vy * .985 + .035;
+       particle.vy = particle.vy * .985 + .028;
       particle.life -= particle.decay;
       if (particle.life <= 0) return false;
-      fx.fillStyle = `rgba(${particle.color},${particle.life * .8})`;
+       fx.fillStyle = `rgba(${particle.color},${particle.life * .66})`;
       fx.beginPath();
       fx.arc(particle.x, particle.y, Math.max(.3, particle.size * particle.life), 0, Math.PI * 2);
       fx.fill();
       return true;
     });
     rings = rings.filter((ring) => {
-      ring.radius += 5;
-      ring.life -= .035;
+       ring.radius += 3.4;
+       ring.life -= .06;
       if (ring.life <= 0) return false;
-      fx.strokeStyle = `rgba(226,178,61,${ring.life * .5})`;
-      fx.lineWidth = 1.5;
+       fx.strokeStyle = `rgba(155,112,26,${ring.life * .34})`;
+       fx.lineWidth = 1;
       fx.beginPath();
       fx.ellipse(ring.x, ring.y, ring.radius * 1.9, ring.radius * .28, 0, 0, Math.PI * 2);
       fx.stroke();
@@ -394,6 +398,30 @@
     });
     fx.restore();
     requestAnimationFrame(drawFx);
+  }
+
+  function drawAmbient(now) {
+    const width = ambientCanvas.clientWidth;
+    const height = ambientCanvas.clientHeight;
+    ambient.clearRect(0, 0, width, height);
+    const dark = root.dataset.theme === "dark";
+    for (const mote of ambientMotes) {
+      const time = now * .00018 + mote.phase;
+      mote.x += Math.sin(time * 1.2) * mote.drift;
+      mote.y += Math.cos(time * .7) * mote.drift * .35;
+      if (mote.x < -8) mote.x = width + 8;
+      if (mote.x > width + 8) mote.x = -8;
+      if (mote.y < -8) mote.y = height + 8;
+      if (mote.y > height + 8) mote.y = -8;
+      const shimmer = .35 + Math.sin(time * 2.2) * .18;
+      const radius = dark ? (.45 + mote.depth * .9) : (.55 + mote.depth * 1.35);
+      const alpha = (dark ? .17 : .11) * mote.depth * shimmer;
+      ambient.fillStyle = dark ? `rgba(157,190,235,${alpha})` : `rgba(187,130,25,${alpha})`;
+      ambient.beginPath();
+      ambient.arc(mote.x, mote.y, radius, 0, Math.PI * 2);
+      ambient.fill();
+    }
+    requestAnimationFrame(drawAmbient);
   }
 
   function ensureAudio() {
@@ -806,10 +834,10 @@
       if (progress >= 1) finishReveal();
     } else if (state === "idle" || state === "settled") {
       // A low-amplitude, non-physical rest motion keeps the coin present without changing its result.
-      const phase = now * .00055;
-      const driftX = Math.sin(phase * .83) * 3.4 + Math.sin(phase * 1.71) * .8;
-      const driftY = Math.cos(phase * 1.07) * 5.6 - 1.2;
-      const tilt = quaternionFromEuler(Math.sin(phase * .94) * 3.8, Math.cos(phase * .76) * 5.4, Math.sin(phase * 1.4) * 1.15);
+      const phase = now * .00078;
+      const driftX = Math.sin(phase * .83) * 5.2 + Math.sin(phase * 1.71) * 1.25;
+      const driftY = Math.cos(phase * 1.07) * 8.2 - 1.7;
+      const tilt = quaternionFromEuler(Math.sin(phase * .94) * 5.6, Math.cos(phase * .76) * 7.8, Math.sin(phase * 1.4) * 1.8);
       setCoinTransform(driftX, driftY, normalizeQuaternion(multiplyQuaternions(tilt, coinOrientation)));
       updateShadow(Math.max(0, -driftY), driftX);
     }
@@ -956,9 +984,11 @@
   });
 
   function updateMusicUi(playing, awaiting) {
-    musicToggle.setAttribute("aria-pressed", playing ? "true" : "false");
+    const enabled = musicWanted && (playing || awaiting);
+    musicToggle.setAttribute("aria-pressed", enabled ? "true" : "false");
     musicToggle.classList.toggle("awaiting", !!awaiting);
-    musicToggle.setAttribute("aria-label", playing ? "关闭背景音乐" : "播放背景音乐");
+    musicToggle.setAttribute("aria-label", playing || awaiting ? "关闭背景音乐" : "播放背景音乐");
+    musicToggle.title = awaiting ? "背景音乐已开启，等待浏览器允许播放" : (playing ? "关闭背景音乐" : "播放背景音乐");
   }
 
   async function attemptMusic() {
@@ -1022,8 +1052,15 @@
     ensureAudio();
     if (musicWanted && bgm.paused) attemptMusic();
     document.removeEventListener("pointerdown", unlockMusic, true);
+    document.removeEventListener("keydown", unlockMusic, true);
+    document.removeEventListener("touchstart", unlockMusic, true);
   };
   document.addEventListener("pointerdown", unlockMusic, true);
+  document.addEventListener("keydown", unlockMusic, true);
+  document.addEventListener("touchstart", unlockMusic, true);
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden && musicWanted && bgm.paused) attemptMusic();
+  });
 
   function updateClock() {
     const now = new Date();
@@ -1068,6 +1105,7 @@
   }).catch(() => {});
   requestAnimationFrame(tick);
   requestAnimationFrame(drawFx);
+  requestAnimationFrame(drawAmbient);
   window.PYB_GAME = {
     launch,
     getState: () => state,

@@ -413,6 +413,10 @@ footer { position: relative; z-index: 2; width: min(1160px, calc(100% - 40px)); 
   .tool.music i { animation: none; }
 }
 
+.ambient-canvas { position: absolute; z-index: 1; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.scene-wash { z-index: 2; }
+.celebration { display: none; }
+
 /* Typography and color system: contrast comes from the composition, not glow. */
 :root {
   --bg: #edf3ef;

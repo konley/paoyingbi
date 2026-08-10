@@ -12,7 +12,7 @@
   <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=20260809j">
   <link rel="manifest" href="/site.webmanifest">
   <title>抛硬币 · TOP | paoyingbi.top</title>
-  <link rel="stylesheet" href="/assets/style-engraved-coin.css">
+  <link rel="stylesheet" href="/assets/style-atmosphere.css">
   <script>
     try {
       var savedTheme = localStorage.getItem("pyb-theme");
@@ -28,6 +28,7 @@
   <div class="scene" aria-hidden="true">
     <img class="active" id="scene-image-a" src="/assets/landscape.webp" alt="" width="2200" height="1238" fetchpriority="high">
     <img id="scene-image-b" alt="" width="2200" height="1238" decoding="async">
+    <canvas class="ambient-canvas" id="ambient-canvas"></canvas>
     <div class="scene-wash"></div>
   </div>
 
@@ -138,6 +139,6 @@
     <source src="/assets/audio/bgm.mp3" type="audio/mpeg">
   </audio>
   <script src="/assets/vendor/node_modules/matter-js/build/matter.min.js" defer></script>
-  <script src="/assets/app-fair-coin.js" defer></script>
+  <script src="/assets/app-music-default.js" defer></script>
 </body>
 </html>
