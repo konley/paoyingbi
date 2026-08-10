@@ -101,7 +101,7 @@
     const preview = element("div", "media-preview");
     if (item.kind === "background") {
       const image = document.createElement("img");
-      image.src = item.url;
+      image.src = item.thumbnail_url || item.url;
       image.alt = "";
       image.loading = "lazy";
       preview.appendChild(image);
@@ -223,23 +223,43 @@
   }
 
   function bindUploadForm(id, kind) {
-    byId(id).addEventListener("submit", async (event) => {
+    const form = byId(id);
+    const input = form.elements.upload;
+    const summary = form.querySelector(".selection-summary");
+    input.addEventListener("change", () => {
+      const names = Array.from(input.files, (file) => file.name.replace(/\.[^.]+$/, ""));
+      summary.textContent = names.length ? `${names.length} 个文件 · ${names.join("、")}` : "选择后将自动使用文件名";
+    });
+    form.addEventListener("submit", async (event) => {
       event.preventDefault();
-      const form = event.currentTarget;
       const button = form.querySelector("button");
-      const formData = new FormData(form);
-      formData.set("kind", kind);
+      const files = Array.from(input.files);
+      if (!files.length) return;
       if (!await preserveEdits()) return;
       button.disabled = true;
+      let completed = 0;
+      const failed = [];
       try {
-        state.config = await api("/api/admin/media/uploads", { method: "POST", body: formData });
+        for (const file of files) {
+          const formData = new FormData();
+          formData.set("kind", kind);
+          formData.set("name", file.name.replace(/\.[^.]+$/, "").replace(/[_-]+/g, " "));
+          formData.set("upload", file);
+          button.firstChild.textContent = `上传 ${completed + 1} / ${files.length} `;
+          try {
+            state.config = await api("/api/admin/media/uploads", { method: "POST", body: formData });
+            completed += 1;
+          } catch (error) {
+            failed.push(`${file.name}：${error.message}`);
+          }
+        }
         state.dirty = false;
         form.reset();
+        summary.textContent = "选择后将自动使用文件名";
         render();
-        showToast(kind === "background" ? "图片已上传" : "音乐已上传");
-      } catch (error) {
-        showToast(error.message);
+        showToast(failed.length ? `成功 ${completed} 个，失败 ${failed.length} 个：${failed[0]}` : `${completed} 个文件已上传`);
       } finally {
+        button.firstChild.textContent = "批量上传 ";
         button.disabled = false;
       }
     });

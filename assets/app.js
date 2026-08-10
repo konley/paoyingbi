@@ -153,7 +153,7 @@
         active.classList.remove("active", "incoming");
         incoming.classList.remove("incoming");
       }
-    }, reducedMotion ? 20 : 1400);
+    }, reducedMotion ? 20 : 1900);
   }
 
   function nextBackground() {

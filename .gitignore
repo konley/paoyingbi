@@ -10,9 +10,11 @@ data/runtime/
 # Administrator uploads
 uploads/images/*
 uploads/audio/*
+uploads/thumbnails/*
 uploads/.tmp/
 !uploads/images/.gitkeep
 !uploads/audio/.gitkeep
+!uploads/thumbnails/.gitkeep
 
 # Python environment
 .venv/

@@ -36,13 +36,13 @@ body { margin: 0; min-width: 320px; min-height: 100vh; overflow-x: hidden; backg
 button, a { font: inherit; }
 button { -webkit-tap-highlight-color: transparent; }
 
-.scene { position: absolute; inset: 0 0 auto; height: max(760px, 100svh); overflow: hidden; background: #b6d4dc; pointer-events: none; }
-.scene img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; object-fit: cover; object-position: center; opacity: 0; transition: opacity 1.4s ease; }
-.scene img.active { opacity: 1; }
+.scene { position: absolute; inset: 0 0 auto; height: calc(max(760px, 100svh) + 360px); overflow: hidden; background: var(--bg); pointer-events: none; }
+.scene img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; object-fit: cover; object-position: center; opacity: 0; transform: scale(1.025); transition: opacity 1.8s ease, transform 2.4s ease; -webkit-mask-image: linear-gradient(#000 0 68%, rgba(0,0,0,.92) 78%, transparent 99%); mask-image: linear-gradient(#000 0 68%, rgba(0,0,0,.92) 78%, transparent 99%); }
+.scene img.active { opacity: 1; transform: scale(1); }
 .scene img.incoming { z-index: 1; }
-.scene-wash { position: absolute; z-index: 2; inset: 0; background: linear-gradient(90deg, rgba(244,249,247,.94), rgba(244,249,247,.72) 36%, rgba(238,246,242,.13) 70%), linear-gradient(180deg, transparent 55%, var(--bg) 100%); }
+.scene-wash { position: absolute; z-index: 2; inset: 0; background: linear-gradient(180deg, transparent 48%, rgba(238,243,240,.18) 66%, var(--bg) 96%), linear-gradient(90deg, rgba(244,249,247,.94), rgba(244,249,247,.72) 36%, rgba(238,246,242,.13) 70%); }
 [data-theme="dark"] .scene img { filter: brightness(.48) saturate(.75); }
-[data-theme="dark"] .scene-wash { background: linear-gradient(90deg, rgba(7,12,10,.91), rgba(7,12,10,.66) 38%, rgba(5,9,8,.17) 72%), linear-gradient(180deg, transparent 52%, var(--bg) 100%); }
+[data-theme="dark"] .scene-wash { background: linear-gradient(180deg, transparent 48%, rgba(11,16,14,.2) 66%, var(--bg) 96%), linear-gradient(90deg, rgba(7,12,10,.91), rgba(7,12,10,.66) 38%, rgba(5,9,8,.17) 72%); }
 
 .topbar { position: absolute; z-index: 20; top: 0; left: 50%; width: min(1160px, calc(100% - 40px)); height: 84px; transform: translateX(-50%); display: flex; align-items: center; justify-content: space-between; border-bottom: 0; }
 .brand { display: flex; align-items: center; gap: 12px; color: var(--text); text-decoration: none; }
@@ -244,9 +244,9 @@ footer { position: relative; z-index: 2; width: min(1160px, calc(100% - 40px)); 
 @keyframes celebrationMark { 0% { opacity: 0; transform: translate(-50%,-50%) scale(.35) rotate(-12deg); } 32% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%,-50%) scale(1.15) rotate(8deg); } }
 
 @media (max-width: 840px) {
-  .scene { height: 980px; }
+  .scene { height: 1240px; }
   .scene img { object-position: 60% center; }
-  .scene-wash { background: linear-gradient(180deg, rgba(242,248,245,.17), rgba(242,248,245,.18) 38%, rgba(242,248,245,.92) 78%, var(--bg) 100%); }
+  .scene-wash { background: linear-gradient(180deg, rgba(242,248,245,.17), rgba(242,248,245,.18) 34%, rgba(242,248,245,.76) 70%, var(--bg) 96%); }
   [data-theme="dark"] .scene-wash { background: linear-gradient(180deg, rgba(6,11,9,.22), rgba(6,11,9,.24) 38%, rgba(6,11,9,.9) 78%, var(--bg) 100%); }
   .hero { min-height: 980px; grid-template-columns: 1fr; gap: 0; padding-top: 84px; }
   .coin-stage { left: 0; order: -1; min-height: 430px; }
@@ -275,7 +275,7 @@ footer { position: relative; z-index: 2; width: min(1160px, calc(100% - 40px)); 
   .tools { gap: 6px; }
   .tool { width: 36px; height: 36px; background: rgba(245,249,246,.72); box-shadow: 0 3px 12px rgba(24,42,35,.1); backdrop-filter: none; }
   [data-theme="dark"] .tool { background: rgba(8,14,11,.7); }
-  .scene { position: absolute; height: 930px; contain: paint; }
+  .scene { position: absolute; height: 1170px; contain: paint; }
   .scene img { object-position: 61% center; filter: none; }
   [data-theme="dark"] .scene img { filter: brightness(.48) saturate(.75); }
   .hero { min-height: 930px; padding: 70px 0 36px; align-content: start; }

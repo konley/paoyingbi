@@ -60,6 +60,8 @@ h2 { margin: 8px 0 0; font: 700 2rem var(--serif); }
 .add-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; margin-bottom: 34px; background: var(--line); }
 .add-form { display: grid; grid-template-columns: 1fr 1fr auto; gap: 14px; align-items: end; padding: 24px; background: var(--surface); }
 .add-form h3 { grid-column: 1/-1; margin: 0 0 4px; font: 700 1.05rem var(--serif); }
+.add-form .upload-field { grid-column: span 1; }
+.selection-summary { min-width: 0; margin: 0; overflow: hidden; color: var(--muted); font-size: .73rem; text-overflow: ellipsis; white-space: nowrap; }
 .add-form button { height: 44px; min-width: 92px; border: 1px solid var(--line); border-radius: 22px 5px 22px 22px; background: var(--ink); color: #f7f5e9; }
 .remote-note { max-width: 740px; margin: -16px 0 28px; color: var(--muted); font-size: .73rem; }
 .media-list { display: grid; gap: 1px; background: var(--line); }
@@ -94,6 +96,7 @@ button:disabled { opacity: .55; cursor: wait; }
   .settings-grid { grid-template-columns: repeat(2,1fr); }
   .add-form { grid-template-columns: 1fr; }
   .add-form h3 { grid-column: auto; }
+  .add-form .upload-field { grid-column: auto; }
   .media-row { grid-template-columns: 88px minmax(0,1fr) 100px; }
   .media-preview { width: 88px; }
   .row-actions { grid-column: 2/-1; }

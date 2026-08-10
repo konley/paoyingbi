@@ -49,6 +49,8 @@ SESSION_ABSOLUTE_SECONDS = 12 * 60 * 60
 MAX_UPLOAD_BYTES = 30 * 1024 * 1024
 MAX_IMAGE_PIXELS = 40_000_000
 MAX_AUDIO_SECONDS = 60 * 60
+MAX_BACKGROUND_EDGE = 2560
+THUMBNAIL_EDGE = 480
 CONFIG_LOCK = threading.RLock()
 PASSWORD_HASHER = PasswordHasher(time_cost=3, memory_cost=65536, parallelism=2)
 LOGGER = logging.getLogger("paoyingbi.admin")
@@ -86,6 +88,7 @@ class MediaItem(BaseModel):
     source: Literal["bundled", "upload", "remote"]
     name: str = Field(min_length=1, max_length=120)
     url: str = Field(min_length=1, max_length=2048)
+    thumbnail_url: str | None = Field(default=None, max_length=2048)
     enabled: bool = True
     created_at: str = Field(min_length=10, max_length=40)
 
@@ -101,13 +104,14 @@ class MediaItem(BaseModel):
     def validate_location(self) -> Self:
         if self.source == "remote":
             self.url = validate_remote_url(self.url)
-            return self
-        if self.source == "upload":
+        elif self.source == "upload":
             expected = "/uploads/images/" if self.kind == "background" else "/uploads/audio/"
             if not self.url.startswith(expected) or ".." in self.url:
                 raise ValueError("Invalid uploaded media URL")
         elif not self.url.startswith("/assets/") or ".." in self.url:
             raise ValueError("Invalid bundled media URL")
+        if self.thumbnail_url and (not self.thumbnail_url.startswith("/uploads/thumbnails/") or ".." in self.thumbnail_url):
+            raise ValueError("Invalid thumbnail URL")
         return self
 
 
@@ -188,6 +192,9 @@ def database() -> sqlite3.Connection:
 def initialize_database() -> None:
     RUNTIME_DIR.mkdir(parents=True, exist_ok=True)
     TEMP_DIR.mkdir(parents=True, exist_ok=True)
+    (UPLOAD_ROOT / "images").mkdir(parents=True, exist_ok=True)
+    (UPLOAD_ROOT / "audio").mkdir(parents=True, exist_ok=True)
+    (UPLOAD_ROOT / "thumbnails").mkdir(parents=True, exist_ok=True)
     with database() as connection:
         connection.execute("PRAGMA journal_mode=WAL")
         connection.execute(
@@ -349,9 +356,11 @@ def stream_upload(upload: UploadFile) -> tuple[Path, int]:
     return temporary, total
 
 
-def process_image(temporary: Path, media_id: str) -> str:
+def process_image(temporary: Path, media_id: str) -> tuple[str, str]:
     final_path = UPLOAD_ROOT / "images" / f"{media_id}.webp"
+    thumbnail_path = UPLOAD_ROOT / "thumbnails" / f"{media_id}.webp"
     encoded_path = TEMP_DIR / f"encoded-{media_id}.webp"
+    encoded_thumbnail_path = TEMP_DIR / f"thumbnail-{media_id}.webp"
     try:
         with Image.open(temporary) as source:
             width, height = source.size
@@ -360,18 +369,37 @@ def process_image(temporary: Path, media_id: str) -> str:
             source.load()
             image = ImageOps.exif_transpose(source)
             image = image.convert("RGBA" if "A" in image.getbands() else "RGB")
-            image.save(encoded_path, format="WEBP", quality=90, method=6)
+            image.thumbnail((MAX_BACKGROUND_EDGE, MAX_BACKGROUND_EDGE), Image.Resampling.LANCZOS)
+            thumbnail = image.copy()
+            thumbnail.thumbnail((THUMBNAIL_EDGE, THUMBNAIL_EDGE), Image.Resampling.LANCZOS)
+            image.save(encoded_path, format="WEBP", quality=84, method=6)
+            thumbnail.save(encoded_thumbnail_path, format="WEBP", quality=76, method=6)
         os.chmod(encoded_path, 0o644)
+        os.chmod(encoded_thumbnail_path, 0o644)
         os.replace(encoded_path, final_path)
+        os.replace(encoded_thumbnail_path, thumbnail_path)
     except HTTPException:
+        final_path.unlink(missing_ok=True)
+        thumbnail_path.unlink(missing_ok=True)
         raise
     except (Image.DecompressionBombError, UnidentifiedImageError, OSError, ValueError) as error:
+        final_path.unlink(missing_ok=True)
+        thumbnail_path.unlink(missing_ok=True)
         LOGGER.warning("Image upload processing failed: %s: %s", type(error).__name__, error)
         raise HTTPException(status_code=415, detail="invalid_image") from error
     finally:
         temporary.unlink(missing_ok=True)
         encoded_path.unlink(missing_ok=True)
-    return f"/uploads/images/{final_path.name}"
+        encoded_thumbnail_path.unlink(missing_ok=True)
+    return f"/uploads/images/{final_path.name}", f"/uploads/thumbnails/{thumbnail_path.name}"
+
+
+def upload_name(upload: UploadFile, supplied_name: str) -> str:
+    cleaned = " ".join(supplied_name.split())
+    if not cleaned:
+        cleaned = Path(upload.filename or "未命名资源").stem.replace("_", " ").replace("-", " ")
+        cleaned = " ".join(cleaned.split())
+    return (cleaned or "未命名资源")[:120]
 
 
 def process_audio(temporary: Path, media_id: str) -> str:
@@ -419,7 +447,7 @@ def ensure_same_media(current: SiteSettings, proposed: SiteSettings) -> None:
         raise HTTPException(status_code=422, detail="media_set_changed")
     for media_id, existing in current_items.items():
         candidate = proposed_items[media_id]
-        immutable = ("id", "kind", "source", "url", "created_at")
+        immutable = ("id", "kind", "source", "url", "thumbnail_url", "created_at")
         if any(getattr(existing, field) != getattr(candidate, field) for field in immutable):
             raise HTTPException(status_code=422, detail="immutable_media_field_changed")
 
@@ -543,17 +571,32 @@ def update_config(proposed: SiteSettings, _: CsrfSessionDep) -> SiteSettings:
 def upload_media(
     _: CsrfSessionDep,
     kind: Annotated[Literal["background", "music"], Form()],
-    name: Annotated[str, Form(min_length=1, max_length=120)],
     upload: Annotated[UploadFile, File()],
+    name: Annotated[str, Form(max_length=120)] = "",
 ) -> SiteSettings:
     temporary, _ = stream_upload(upload)
     media_id = uuid.uuid4().hex
-    public_url = process_image(temporary, media_id) if kind == "background" else process_audio(temporary, media_id)
-    item = MediaItem(id=media_id, kind=kind, source="upload", name=name, url=public_url, enabled=True, created_at=utc_now())
+    thumbnail_url = None
+    if kind == "background":
+        public_url, thumbnail_url = process_image(temporary, media_id)
+    else:
+        public_url = process_audio(temporary, media_id)
+    item = MediaItem(
+        id=media_id,
+        kind=kind,
+        source="upload",
+        name=upload_name(upload, name),
+        url=public_url,
+        thumbnail_url=thumbnail_url,
+        enabled=True,
+        created_at=utc_now(),
+    )
     try:
         return add_media_item(item)
     except Exception:
         (SITE_ROOT / public_url.lstrip("/")).unlink(missing_ok=True)
+        if thumbnail_url:
+            (SITE_ROOT / thumbnail_url.lstrip("/")).unlink(missing_ok=True)
         raise
 
 
@@ -588,4 +631,6 @@ def delete_media(media_id: str, _: CsrfSessionDep) -> SiteSettings:
         write_settings_unlocked(updated)
     if item.source == "upload":
         (SITE_ROOT / item.url.lstrip("/")).unlink(missing_ok=True)
+        if item.thumbnail_url:
+            (SITE_ROOT / item.thumbnail_url.lstrip("/")).unlink(missing_ok=True)
     return updated

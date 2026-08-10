@@ -4,8 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#eef3f0">
+  <link rel="icon" href="/icons/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
   <title>站点管理 · 抛硬币</title>
-  <link rel="stylesheet" href="/admin/admin.css?v=20260809b">
+  <link rel="stylesheet" href="/admin/admin.css?v=20260810c">
 </head>
 <body>
   <main class="login-view" id="login-view">
@@ -73,9 +76,9 @@
         <div class="add-grid">
           <form class="add-form" id="background-upload-form">
             <h3>上传图片</h3>
-            <label>显示名称<input name="name" type="text" maxlength="120" required placeholder="例如：雨后的林间"></label>
-            <label>选择文件<input name="upload" type="file" accept="image/jpeg,image/png,image/webp" required></label>
-            <button type="submit">上传 <span aria-hidden="true">↑</span></button>
+            <label class="upload-field">选择文件<input name="upload" type="file" accept="image/jpeg,image/png,image/webp" required multiple></label>
+            <p class="selection-summary" aria-live="polite">选择后将自动使用文件名</p>
+            <button type="submit">批量上传 <span aria-hidden="true">↑</span></button>
           </form>
           <form class="add-form" id="background-remote-form">
             <h3>引用网络图片</h3>
@@ -95,9 +98,9 @@
         <div class="add-grid">
           <form class="add-form" id="music-upload-form">
             <h3>上传音乐</h3>
-            <label>曲目名称<input name="name" type="text" maxlength="120" required placeholder="例如：夜色来信"></label>
-            <label>选择文件<input name="upload" type="file" accept="audio/mpeg,audio/ogg,audio/opus,audio/mp4" required></label>
-            <button type="submit">上传 <span aria-hidden="true">↑</span></button>
+            <label class="upload-field">选择文件<input name="upload" type="file" accept="audio/mpeg,audio/ogg,audio/opus,audio/mp4" required multiple></label>
+            <p class="selection-summary" aria-live="polite">选择后将自动使用文件名</p>
+            <button type="submit">批量上传 <span aria-hidden="true">↑</span></button>
           </form>
           <form class="add-form" id="music-remote-form">
             <h3>引用网络音乐</h3>
@@ -114,6 +117,6 @@
     <footer class="admin-footer"><span>paoyingbi.top</span><span>design by konley</span></footer>
   </div>
   <div class="admin-toast" id="admin-toast" role="status" aria-live="polite"></div>
-  <script src="/admin/admin.js?v=20260809b" defer></script>
+  <script src="/admin/admin.js?v=20260810c" defer></script>
 </body>
 </html>
