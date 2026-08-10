@@ -1,0 +1,34 @@
+[Unit]
+Description=Paoyingbi media administration API
+After=network.target
+
+[Service]
+Type=simple
+User=paoyingbi-admin
+Group=paoyingbi-admin
+WorkingDirectory=/srv/paoyingbi
+EnvironmentFile=/etc/example-app/admin.env
+Environment=ADMIN_SITE_ROOT=/srv/paoyingbi
+Environment=ADMIN_RUNTIME_DIR=/var/lib/example-app-admin
+Environment=PYTHONDONTWRITEBYTECODE=1
+ExecStart=/srv/paoyingbi/.venv/bin/python -m uvicorn admin_server.main:app --host 127.0.0.1 --port 8787 --workers 1 --proxy-headers --forwarded-allow-ips 127.0.0.1 --no-server-header
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=15
+UMask=0027
+MemoryMax=384M
+
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+ReadWritePaths=/var/lib/example-app-admin /srv/paoyingbi/uploads
+
+[Install]
+WantedBy=multi-user.target

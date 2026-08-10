@@ -1,0 +1,70 @@
+# Replace example.com, paths, TLS certificates, and the upstream port before use.
+limit_req_zone $binary_remote_addr zone=paoyingbi_login:10m rate=10r/m;
+
+upstream paoyingbi_admin {
+    server 127.0.0.1:8787;
+    keepalive 8;
+}
+
+server {
+    listen 80;
+    server_name example.com www.example.com;
+    return 308 https://example.com$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name example.com www.example.com;
+
+    # Configure certificate paths for your deployment.
+    # Configure the certificate and private-key file locations for your deployment.
+    root /srv/paoyingbi;
+    index index.html;
+    client_max_body_size 32m;
+
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+
+    location = /api/stats {
+        content_by_lua_file /srv/paoyingbi/lua/stats.lua;
+    }
+
+    location = /api/site-config {
+        proxy_pass http://paoyingbi_admin;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location = /my {
+        proxy_pass http://paoyingbi_admin;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location = /api/admin/session {
+        limit_req zone=paoyingbi_login burst=5 nodelay;
+        proxy_pass http://paoyingbi_admin;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location ^~ /api/admin/ {
+        proxy_pass http://paoyingbi_admin;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 60s;
+    }
+
+    location ^~ /uploads/.tmp/ { return 404; }
+    location ^~ /uploads/ { try_files $uri =404; }
+    location ~ ^/(data|config|admin_server|lua)(/|$) { return 404; }
+    location ~ (^|/)\. { return 404; }
+    location / { try_files $uri $uri/ =404; }
+}

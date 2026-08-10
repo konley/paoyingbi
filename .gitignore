@@ -1,0 +1,40 @@
+# Runtime secrets and state
+config/admin.env
+data/stats.json
+data/site-config.json
+data/runtime/
+*.db
+*.db-shm
+*.db-wal
+
+# Administrator uploads
+uploads/images/*
+uploads/audio/*
+uploads/.tmp/
+!uploads/images/.gitkeep
+!uploads/audio/.gitkeep
+
+# Python environment
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Local tooling
+.DS_Store
+*.log
+
+# Deployment-specific files. Commit only the templates in deploy/.
+deploy/*.local
+deploy/*.conf
+!deploy/nginx.conf.example
+
+# Matter.js is vendored as its browser bundle only; source and package install state are reproducible noise.
+assets/vendor/node_modules/
+!assets/vendor/node_modules/matter-js/
+assets/vendor/node_modules/matter-js/*
+!assets/vendor/node_modules/matter-js/build/
+assets/vendor/node_modules/matter-js/build/*
+!assets/vendor/node_modules/matter-js/build/matter.min.js
+!assets/vendor/node_modules/matter-js/LICENSE
+assets/vendor/package-lock.json

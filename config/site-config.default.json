@@ -1,0 +1,28 @@
+{
+  "revision": 1,
+  "background_mode": "single",
+  "background_interval": 18,
+  "music_mode": "sequence",
+  "backgrounds": [
+    {
+      "id": "default-landscape",
+      "kind": "background",
+      "source": "bundled",
+      "name": "林间晴光",
+      "url": "/assets/landscape.webp",
+      "enabled": true,
+      "created_at": "2026-08-09T00:00:00Z"
+    }
+  ],
+  "music": [
+    {
+      "id": "default-bgm",
+      "kind": "music",
+      "source": "bundled",
+      "name": "推动摇篮的手",
+      "url": "/assets/audio/bgm.mp3",
+      "enabled": true,
+      "created_at": "2026-08-09T00:00:00Z"
+    }
+  ]
+}

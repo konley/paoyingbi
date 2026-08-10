@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#eef3f0">
+  <title>站点管理 · 抛硬币</title>
+  <link rel="stylesheet" href="/admin/admin.css?v=20260809b">
+</head>
+<body>
+  <main class="login-view" id="login-view">
+    <section class="login-panel" aria-labelledby="login-title">
+      <a class="admin-brand" href="/" aria-label="返回抛硬币首页"><span>TOP</span><strong>抛硬币</strong></a>
+      <p class="kicker">SITE CONSOLE</p>
+      <h1 id="login-title">安静地，<br>管理这一页</h1>
+      <form id="login-form">
+        <label for="password">管理密码</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" required maxlength="256">
+        <button class="primary-command" type="submit">进入后台 <span aria-hidden="true">→</span></button>
+        <p class="form-error" id="login-error" role="alert"></p>
+      </form>
+    </section>
+  </main>
+
+  <div class="admin-view" id="admin-view" hidden>
+    <header class="admin-header">
+      <a class="admin-brand" href="/" aria-label="返回抛硬币首页"><span>TOP</span><strong>抛硬币</strong></a>
+      <div class="header-actions">
+        <a href="/" target="_blank" rel="noopener">查看前台</a>
+        <button class="icon-command" id="logout-btn" type="button" title="退出登录" aria-label="退出登录">↗</button>
+      </div>
+    </header>
+
+    <main class="admin-main">
+      <section class="admin-intro">
+        <p class="kicker">MEDIA & ATMOSPHERE</p>
+        <h1>让光影与声音，<br>保持流动</h1>
+        <p>管理首页背景和背景音乐。修改仅在保存后生效。</p>
+      </section>
+
+      <section class="settings-band" aria-labelledby="settings-title">
+        <div>
+          <p class="section-index">01 / PLAYBACK</p>
+          <h2 id="settings-title">播放规则</h2>
+        </div>
+        <div class="settings-grid">
+          <label>背景方式
+            <select id="background-mode">
+              <option value="single">固定首张</option>
+              <option value="rotate">顺序轮换</option>
+              <option value="shuffle">随机轮换</option>
+            </select>
+          </label>
+          <label>轮换间隔
+            <span class="number-field"><input id="background-interval" type="number" min="6" max="300" step="1"><i>秒</i></span>
+          </label>
+          <label>音乐方式
+            <select id="music-mode">
+              <option value="single">固定首曲</option>
+              <option value="sequence">顺序播放</option>
+              <option value="shuffle">随机播放</option>
+            </select>
+          </label>
+          <button class="save-command" id="save-settings" type="button">保存设置 <span aria-hidden="true">✓</span></button>
+        </div>
+      </section>
+
+      <section class="media-section" aria-labelledby="background-title">
+        <header>
+          <div><p class="section-index">02 / SCENERY</p><h2 id="background-title">背景图片</h2></div>
+          <strong id="background-count">0</strong>
+        </header>
+        <div class="add-grid">
+          <form class="add-form" id="background-upload-form">
+            <h3>上传图片</h3>
+            <label>显示名称<input name="name" type="text" maxlength="120" required placeholder="例如：雨后的林间"></label>
+            <label>选择文件<input name="upload" type="file" accept="image/jpeg,image/png,image/webp" required></label>
+            <button type="submit">上传 <span aria-hidden="true">↑</span></button>
+          </form>
+          <form class="add-form" id="background-remote-form">
+            <h3>引用网络图片</h3>
+            <label>显示名称<input name="name" type="text" maxlength="120" required placeholder="例如：远山薄雾"></label>
+            <label>HTTPS 地址<input name="url" type="url" inputmode="url" required placeholder="https://..."></label>
+            <button type="submit">添加 <span aria-hidden="true">＋</span></button>
+          </form>
+        </div>
+        <div class="media-list" id="background-list"></div>
+      </section>
+
+      <section class="media-section music-section" aria-labelledby="music-title">
+        <header>
+          <div><p class="section-index">03 / SOUND</p><h2 id="music-title">背景音乐</h2></div>
+          <strong id="music-count">0</strong>
+        </header>
+        <div class="add-grid">
+          <form class="add-form" id="music-upload-form">
+            <h3>上传音乐</h3>
+            <label>曲目名称<input name="name" type="text" maxlength="120" required placeholder="例如：夜色来信"></label>
+            <label>选择文件<input name="upload" type="file" accept="audio/mpeg,audio/ogg,audio/opus,audio/mp4" required></label>
+            <button type="submit">上传 <span aria-hidden="true">↑</span></button>
+          </form>
+          <form class="add-form" id="music-remote-form">
+            <h3>引用网络音乐</h3>
+            <label>曲目名称<input name="name" type="text" maxlength="120" required placeholder="例如：风经过时"></label>
+            <label>HTTPS 地址<input name="url" type="url" inputmode="url" required placeholder="https://..."></label>
+            <button type="submit">添加 <span aria-hidden="true">＋</span></button>
+          </form>
+        </div>
+        <p class="remote-note">外链资源由访客浏览器直接请求，资源提供方可能看到访问 IP。仅使用可信 HTTPS 地址。</p>
+        <div class="media-list" id="music-list"></div>
+      </section>
+    </main>
+
+    <footer class="admin-footer"><span>paoyingbi.top</span><span>design by konley</span></footer>
+  </div>
+  <div class="admin-toast" id="admin-toast" role="status" aria-live="polite"></div>
+  <script src="/admin/admin.js?v=20260809b" defer></script>
+</body>
+</html>

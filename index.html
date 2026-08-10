@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#eef3f0">
+  <meta name="description" content="paoyingbi.top - 抛起见顶。在正反之间，让一枚硬币替你停下犹豫。">
+  <meta property="og:title" content="抛硬币 · TOP">
+  <meta property="og:description" content="抛起见顶。正反之间，向上而行。">
+  <meta property="og:type" content="website">
+  <link rel="icon" href="/icons/favicon.svg?v=20260809j" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=20260809j">
+  <link rel="manifest" href="/site.webmanifest">
+  <title>抛硬币 · TOP | paoyingbi.top</title>
+  <link rel="stylesheet" href="/assets/style.css?v=20260810g">
+  <script>
+    try {
+      var savedTheme = localStorage.getItem("pyb-theme");
+      if (savedTheme === "dark") document.documentElement.dataset.theme = "dark";
+    } catch (_) {}
+  </script>
+</head>
+<body>
+  <canvas class="fx-canvas" id="fx-canvas" aria-hidden="true"></canvas>
+  <div class="celebration" id="celebration" aria-hidden="true">
+    <i></i><i></i><i></i><span id="celebration-mark">✦</span>
+  </div>
+  <div class="scene" aria-hidden="true">
+    <img class="active" id="scene-image-a" src="/assets/landscape.webp" alt="" width="2200" height="1238" fetchpriority="high">
+    <img id="scene-image-b" alt="" width="2200" height="1238" decoding="async">
+    <div class="scene-wash"></div>
+  </div>
+
+  <header class="topbar">
+    <a class="brand" href="#home" aria-label="抛硬币首页">
+      <span class="brand-coin" aria-hidden="true">TOP</span>
+      <span><strong>抛硬币</strong><small>paoyingbi.<b>top</b></small></span>
+    </a>
+    <div class="tools">
+      <button class="tool" id="theme-toggle" type="button" aria-pressed="false" aria-label="切换深浅主题" title="切换主题">
+        <span class="sun" aria-hidden="true">☀</span><span class="moon" aria-hidden="true">☾</span>
+      </button>
+      <button class="tool sound" id="sound-toggle" type="button" aria-pressed="false" aria-label="开启音效" title="音效">
+        <span aria-hidden="true">♪</span><i></i>
+      </button>
+      <button class="tool music" id="music-toggle" type="button" aria-pressed="true" aria-label="关闭背景音乐" title="背景音乐">
+        <span aria-hidden="true">♫</span><i></i><i></i><i></i>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" id="home">
+      <div class="hero-copy">
+        <p class="eyebrow"><i></i> paoyingbi.top · 抛起见顶</p>
+        <h1><span>抛起</span><span>见<b>顶</b></span></h1>
+        <p class="lede">有些答案不适合被追问，只适合被抛向空中。让它旋转、失重，再在掌心之外，安静地选择一面。</p>
+        <div class="actions">
+          <button class="primary" id="flip-btn" type="button"><span>抛向 TOP</span><small>按住拖动 · 松手抛出</small></button>
+          <a class="secondary" href="#about">读懂意象</a>
+        </div>
+        <div class="stats" aria-label="站点统计">
+          <div><strong id="uptime-days">412</strong><small>已陪伴 / 天</small></div>
+          <div><strong id="flip-count">0</strong><small>累计抛掷</small></div>
+          <div><strong><span id="heads-ratio">50</span>%</strong><small>TOP 占比</small></div>
+        </div>
+      </div>
+
+      <div class="coin-stage" id="coin-stage">
+        <div class="orbit orbit-a" aria-hidden="true"></div>
+        <div class="orbit orbit-b" aria-hidden="true"></div>
+        <div class="coin-aura" aria-hidden="true"><i></i><i></i><i></i></div>
+        <button class="coin-control" id="coin-control" type="button" aria-label="按住拖动并松手抛硬币">
+          <span class="coin" id="coin">
+            <span class="coin-edge" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+            <span class="coin-face coin-heads">
+              <span class="coin-rim"></span><span class="coin-lathe"></span>
+              <span class="coin-code code-left">PAO · 26</span><span class="coin-code code-right">YINGBI · 01</span>
+              <span class="coin-sheen" aria-hidden="true"></span><i class="spark">✦</i><strong>TOP</strong><small>正面 · LUCKY SIDE</small>
+            </span>
+            <span class="coin-face coin-tails">
+              <span class="coin-rim"></span><span class="coin-lathe"></span>
+              <span class="coin-code code-left">QUIET · 26</span><span class="coin-code code-right">MOON · 02</span>
+              <span class="coin-sheen" aria-hidden="true"></span><i class="moon-mark">☾</i><strong>月</strong><small>反面 · QUIET SIDE</small>
+            </span>
+          </span>
+        </button>
+        <div class="coin-shadow" aria-hidden="true"></div>
+        <div class="result" id="result" aria-live="polite"></div>
+        <p class="coin-status" id="coin-status">READY · 按住硬币</p>
+      </div>
+    </section>
+
+    <section class="about" id="about">
+      <div class="section-number">01 / WELCOME</div>
+      <div class="about-copy">
+        <p class="eyebrow">A QUIET ENTRANCE</p>
+        <h2>不必匆忙，<br><b>先安顿这一页</b></h2>
+        <p>有些网站急着展示自己，我们更愿意先留一扇安静的门——好看，也好玩，也足够把「来过」这件事记得温柔一点。</p>
+      </div>
+      <div class="seal" aria-hidden="true"><strong>TOP</strong><span>PAOYINGBI</span></div>
+    </section>
+
+    <section class="interlude" aria-label="关于选择">
+      <span>在正与反之间</span>
+      <blockquote>我们不替你决定。<br><b>只是让犹豫，拥有一次漂亮的落地。</b></blockquote>
+      <i>02 / GRAVITY</i>
+    </section>
+
+    <section class="meaning" aria-label="抛硬币意象">
+      <article><span>TOP</span><h3>正面即顶</h3><p>top 是顶部，也是更好的方向。硬币朝上时，我们把它读作一次抬头。</p></article>
+      <article><span>◎</span><h3>重力作答</h3><p>手势给它起点，空气留下旋转，重力负责最后一笔。答案因此有了重量。</p></article>
+      <article><span>◇</span><h3>域名即诗</h3><p>paoyingbi.top：名字本身就会抛硬币。来到这里，你已经站在「顶」的一侧。</p></article>
+    </section>
+
+    <section class="ledger" id="ledger">
+      <div>
+        <p class="eyebrow">MOMENT</p>
+        <h2>每一次落定，<br>都算数</h2>
+        <blockquote id="fate-line">「域名写着 top，硬币却仍有反面。向上，从不拒绝犹豫。」</blockquote>
+      </div>
+      <div class="ledger-panel">
+        <div class="bar-row"><span>TOP</span><div><i id="bar-heads"></i></div><strong id="heads-count">0</strong></div>
+        <div class="bar-row tails"><span>月</span><div><i id="bar-tails"></i></div><strong id="tails-count">0</strong></div>
+        <div class="history" id="history" aria-label="最近抛掷结果"></div>
+        <button class="primary compact" id="flip-btn-2" type="button">再抛一次</button>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span class="footer-brand">抛硬币 · paoyingbi.top<small>design by <b>konley</b></small></span>
+    <time id="clock"></time>
+  </footer>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <audio id="bgm" preload="auto" autoplay playsinline>
+    <source src="/assets/audio/bgm.ogg" type="audio/ogg; codecs=opus">
+    <source src="/assets/audio/bgm.mp3" type="audio/mpeg">
+  </audio>
+  <script src="/assets/vendor/node_modules/matter-js/build/matter.min.js" defer></script>
+  <script src="/assets/app.js?v=20260810g" defer></script>
+</body>
+</html>
