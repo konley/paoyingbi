@@ -139,7 +139,7 @@
       void coinStatus.offsetWidth;
       coinStatus.classList.add("show-result", "fate-glow");
       clearTimeout(setCoinStatus.glowTimer);
-      setCoinStatus.glowTimer = setTimeout(() => coinStatus.classList.remove("fate-glow"), 2400);
+      setCoinStatus.glowTimer = setTimeout(() => coinStatus.classList.remove("fate-glow"), 1400);
     } else {
       coinStatus.classList.remove("show-result", "fate-glow");
     }
