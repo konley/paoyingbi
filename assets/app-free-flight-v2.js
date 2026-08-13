@@ -21,6 +21,10 @@
   const toast = byId("toast");
   const celebration = byId("celebration");
   const celebrationMark = byId("celebration-mark");
+  const titlecard = byId("titlecard");
+  const titlecardKicker = byId("titlecard-kicker");
+  const titlecardMark = byId("titlecard-mark");
+  const titlecardLine = byId("titlecard-line");
   const fateLine = byId("fate-line");
   const historyElement = byId("history");
   const fxCanvas = byId("fx-canvas");
@@ -53,6 +57,13 @@
       "月相落定，先听清楚，再作回答。",
       "换个方向，也会看见光。",
     ],
+  };
+  const statusCopy = {
+    ready: "犹豫也可以被抛向空中。按住硬币，开始这一次。",
+    drag: "先抓住它。方向还没写完，答案仍在掌心里。",
+    aim: "再拉开一点。松手的瞬间，就是它自己的路。",
+    air: "它在空中自己旋转。这一秒，不必替它决定。",
+    return: "正在回落。让重力把最后一笔写完。",
   };
 
   let state = "idle";
@@ -107,7 +118,7 @@
   let backgroundIndex = 0;
   let backgroundTimer = null;
   let backgroundSwapToken = 0;
-  let musicTracks = [{ name: "推动摇篮的手", url: "/assets/audio/bgm.mp3" }];
+  let musicTracks = [];
   let musicMode = "sequence";
   let musicIndex = 0;
   let musicErrorSkips = 0;
@@ -128,13 +139,20 @@
     paintStats(stats);
   }
 
-  function setCoinStatus(label, title, copy = "", side = "") {
+  function setCoinStatus(label, title, copy = statusCopy.ready, side = "", isResult = false) {
+    const nextCopy = copy || statusCopy.ready;
+    const copyChanged = coinStatusCopy.textContent !== nextCopy;
     coinStatusLabel.textContent = label;
     coinStatusTitle.textContent = title;
-    coinStatusCopy.textContent = copy;
+    coinStatusCopy.textContent = nextCopy;
     coinStatus.dataset.side = side;
-    coinStatus.classList.toggle("is-result", !!copy);
-    if (copy && !reducedMotion) {
+    coinStatus.classList.toggle("is-result", isResult);
+    if (copyChanged && !reducedMotion) {
+      coinStatus.classList.remove("tick");
+      void coinStatus.offsetWidth;
+      coinStatus.classList.add("tick");
+    }
+    if (isResult && !reducedMotion) {
       coinStatus.classList.remove("show-result", "fate-glow");
       void coinStatus.offsetWidth;
       coinStatus.classList.add("show-result", "fate-glow");
@@ -224,7 +242,7 @@
       if (!response.ok) throw new Error("media_config_failed");
       const config = await response.json();
       if (Array.isArray(config.backgrounds) && config.backgrounds.length) backgroundItems = config.backgrounds;
-      if (Array.isArray(config.music)) musicTracks = config.music;
+      if (Array.isArray(config.music) && config.music.length) musicTracks = config.music;
       backgroundMode = ["single", "rotate", "shuffle"].includes(config.background_mode) ? config.background_mode : "single";
       musicMode = ["single", "sequence", "shuffle"].includes(config.music_mode) ? config.music_mode : "sequence";
       await showBackground(0);
@@ -233,8 +251,10 @@
         const interval = Math.max(6, Math.min(300, Number(config.background_interval) || 18));
         backgroundTimer = setInterval(nextBackground, interval * 1000);
       }
+      if (!musicTracks.length) musicTracks = [{ name: "推动摇篮的手", url: "/assets/audio/bgm.mp3" }];
       selectMusic(0);
     } catch (_) {
+      if (!musicTracks.length) musicTracks = [{ name: "推动摇篮的手", url: "/assets/audio/bgm.mp3" }];
       selectMusic(0);
     }
   }
@@ -411,6 +431,20 @@
     rings.push({ x: center.x, y: center.y + coinRadius * .64, radius: 14, life: 1 });
   }
 
+  function showTitlecard(side, message) {
+    if (!titlecard || !titlecardMark) return;
+    const heads = side === "heads";
+    titlecard.dataset.side = side;
+    titlecardKicker.textContent = heads ? "TOP · 正面" : "MOON · 反面";
+    titlecardMark.textContent = heads ? "TOP" : "月";
+    titlecardLine.textContent = message;
+    titlecard.classList.remove("show");
+    void titlecard.offsetWidth;
+    titlecard.classList.add("show");
+    clearTimeout(showTitlecard.timer);
+    showTitlecard.timer = setTimeout(() => titlecard.classList.remove("show"), 2400);
+  }
+
   function celebrateResult(side) {
     if (reducedMotion) return;
     const center = coinScreenCenter();
@@ -535,7 +569,7 @@
     audioBus.connect(compressor);
     room = audioContext.createConvolver();
     const roomGain = audioContext.createGain();
-    roomGain.gain.value = .14;
+    roomGain.gain.value = .07;
     room.connect(roomGain).connect(compressor);
     const impulse = audioContext.createBuffer(2, audioContext.sampleRate * .42, audioContext.sampleRate);
     for (let channel = 0; channel < 2; channel++) {
@@ -562,35 +596,50 @@
     const filter = context.createBiquadFilter();
     const gain = context.createGain();
     source.buffer = noiseBuffer;
-    filter.type = "bandpass";
-    filter.Q.value = .7;
-    filter.frequency.setValueAtTime(440, now);
-    filter.frequency.exponentialRampToValueAtTime(2600 + strength * 1600, now + .18);
-    filter.frequency.exponentialRampToValueAtTime(720, now + .5);
+    filter.type = "highpass";
+    filter.frequency.value = 1400;
     gain.gain.setValueAtTime(.0001, now);
-    gain.gain.exponentialRampToValueAtTime(.085 + strength * .045, now + .05);
-    gain.gain.exponentialRampToValueAtTime(.0001, now + .54);
+    gain.gain.exponentialRampToValueAtTime(.045 + strength * .03, now + .008);
+    gain.gain.exponentialRampToValueAtTime(.0001, now + .07);
     source.connect(filter).connect(gain);
-    connectSound(gain, true);
-    source.start(now, 0, .58);
+    connectSound(gain, false);
+    source.start(now, 0, .08);
   }
 
   function playLanding(heads, power) {
     const context = ensureAudio();
-    if (!context) return;
+    if (!context || !noiseBuffer) return;
     const now = context.currentTime;
-    const base = heads ? 1720 : 1380;
-    [1, 1.47, 2.1, 2.85].forEach((ratio, index) => {
+    const click = context.createBufferSource();
+    const clickFilter = context.createBiquadFilter();
+    const clickGain = context.createGain();
+    click.buffer = noiseBuffer;
+    clickFilter.type = "bandpass";
+    clickFilter.frequency.value = heads ? 2400 : 1700;
+    clickFilter.Q.value = 1.4;
+    clickGain.gain.setValueAtTime(.0001, now);
+    clickGain.gain.exponentialRampToValueAtTime(.16 * power, now + .003);
+    clickGain.gain.exponentialRampToValueAtTime(.0001, now + .045);
+    click.connect(clickFilter).connect(clickGain);
+    connectSound(clickGain, false);
+    click.start(now, 0, .05);
+
+    const base = heads ? 620 : 470;
+    const partials = [1, 1.51, 2.14, 2.76, 3.42, 4.08];
+    partials.forEach((ratio, index) => {
       const oscillator = context.createOscillator();
       const gain = context.createGain();
-      oscillator.type = index < 2 ? "sine" : "triangle";
-      oscillator.frequency.value = base * ratio;
-      gain.gain.setValueAtTime(.074 * Math.pow(.55, index) * power, now);
-      gain.gain.exponentialRampToValueAtTime(.0001, now + .48 * Math.pow(.72, index));
+      oscillator.type = "sine";
+      oscillator.frequency.setValueAtTime(base * ratio * (1 + (Math.random() - .5) * .012), now);
+      oscillator.frequency.exponentialRampToValueAtTime(base * ratio * .97, now + .09);
+      const peak = .042 * Math.pow(.62, index) * power;
+      gain.gain.setValueAtTime(.0001, now);
+      gain.gain.exponentialRampToValueAtTime(peak, now + .004);
+      gain.gain.exponentialRampToValueAtTime(.0001, now + (.09 + index * .012));
       oscillator.connect(gain);
-      connectSound(gain, index < 3);
+      connectSound(gain, index < 2);
       oscillator.start(now);
-      oscillator.stop(now + .52);
+      oscillator.stop(now + .14);
     });
   }
 
@@ -726,14 +775,15 @@
       y: (Math.random() > .5 ? 1 : -1) * (.5 + Math.random() * .38),
       z: horizontal * .2 + (Math.random() - .5) * .28,
     });
-    spinSpeed = 9.2 + launchStrength * 3 + Math.random() * 1.4;
+    spinSpeed = 16.4 + launchStrength * 7 + Math.random() * 2;
     precessionPhase = Math.random() * Math.PI * 2;
     result.classList.remove("show");
+    if (titlecard) titlecard.classList.remove("show");
     stage.classList.remove("aiming", "impact");
     stage.classList.add("airborne");
     coin.classList.remove("settled", "dragging");
     coin.classList.add("flipping");
-    setCoinStatus("IN THE AIR", "向上");
+    setCoinStatus("IN THE AIR", "向上", statusCopy.air);
     setBusy(true);
 
     const startX = Number.isFinite(Number(options.x)) ? Number(options.x) : 0;
@@ -784,7 +834,7 @@
       toOrientation: targetOrientation,
       wobbleAxis: normalizeVector({ x: .75 + Math.random() * .2, y: (Math.random() - .5) * .2, z: .2 + Math.random() * .2 }),
     };
-    setCoinStatus("RETURNING", "优雅回位");
+    setCoinStatus("RETURNING", "优雅回位", statusCopy.return);
   }
 
   async function saveResult(side) {
@@ -821,7 +871,8 @@
     stage.classList.remove("airborne");
     const list = messages[chosenSide];
     const message = list[Math.floor(Math.random() * list.length)];
-    setCoinStatus(heads ? "TOP · 正面" : "MOON · 反面", heads ? "正面朝上" : "反面朝上", message, chosenSide);
+    setCoinStatus(heads ? "TOP · 正面" : "MOON · 反面", heads ? "正面朝上" : "反面朝上", message, chosenSide, true);
+    showTitlecard(chosenSide, message);
     result.textContent = heads ? "✦ TOP · 正面" : "☾ 月 · 反面";
     result.className = "result show " + chosenSide;
     fateLine.textContent = "「" + message + "」";
@@ -914,7 +965,7 @@
       const spinDelta = spinSpeed * deltaSeconds;
       coinOrientation = normalizeQuaternion(multiplyQuaternions(quaternionFromAxisAngle(movingAxis, spinDelta), coinOrientation));
       totalSpinAngle += Math.abs(spinDelta);
-      spinSpeed *= Math.pow(.997, deltaMs / 16.7);
+      spinSpeed *= Math.pow(.9982, deltaMs / 16.7);
       peakAltitude = Math.max(peakAltitude, altitude);
       setCoinTransform(x, y, coinOrientation);
       updateShadow(altitude, x);
@@ -998,7 +1049,7 @@
     coin.classList.add("dragging");
     stage.classList.add("aiming");
     result.classList.remove("show");
-    setCoinStatus("DRAG", "拖动硬币");
+    setCoinStatus("DRAG", "拖动硬币", statusCopy.drag);
     flipButtons.forEach((button) => { button.disabled = true; });
     coinControl.setAttribute("aria-grabbed", "true");
     try { coinControl.setPointerCapture(event.pointerId); } catch (_) {}
@@ -1017,7 +1068,7 @@
     const now = performance.now();
     pointer.samples.push({ x: event.clientX, y: event.clientY, at: now });
     pointer.samples = pointer.samples.filter((sample) => now - sample.at <= 140);
-    if (pointer.maxDistance > 8) setCoinStatus("AIM", "松手抛出");
+    if (pointer.maxDistance > 8) setCoinStatus("AIM", "松手抛出", statusCopy.aim);
   }
 
   function pointerUp(event) {
@@ -1073,10 +1124,10 @@
       coinOrientation = orientationForSide(chosenSide);
       idleStartedAt = performance.now();
       setCoinTransform(0, 0, coinOrientation);
-      setCoinStatus(chosenSide === "heads" ? "TOP · 正面" : "MOON · 反面", chosenSide === "heads" ? "正面朝上" : "反面朝上");
+      setCoinStatus(chosenSide === "heads" ? "TOP · 正面" : "MOON · 反面", chosenSide === "heads" ? "正面朝上" : "反面朝上", "答案已经落在掌心。想再问一次，就再抛一次。", chosenSide, true);
     } else {
       coin.style.transform = "";
-      setCoinStatus("READY", "按住硬币");
+      setCoinStatus("READY", "按住硬币", statusCopy.ready);
     }
   }
 
@@ -1209,13 +1260,26 @@
 
   if (matchMedia("(pointer: fine)").matches) {
     root.classList.add("cursor-enabled");
+    let ringX = innerWidth / 2;
+    let ringY = innerHeight / 2;
+    let targetX = ringX;
+    let targetY = ringY;
     addEventListener("pointermove", (event) => {
+      targetX = event.clientX;
+      targetY = event.clientY;
       cursorDot.style.transform = `translate3d(${event.clientX}px,${event.clientY}px,0)`;
-      cursorRing.style.transform = `translate3d(${event.clientX}px,${event.clientY}px,0)`;
       const interactive = event.target.closest && event.target.closest("a, button, input, select, label");
       root.classList.toggle("cursor-active", !!interactive);
+      root.classList.toggle("cursor-grab", !!(event.target.closest && event.target.closest("#coin-control")));
       root.classList.add("cursor-visible");
     }, { passive: true });
+    const followRing = () => {
+      ringX += (targetX - ringX) * .22;
+      ringY += (targetY - ringY) * .22;
+      cursorRing.style.transform = `translate3d(${ringX}px,${ringY}px,0)`;
+      requestAnimationFrame(followRing);
+    };
+    requestAnimationFrame(followRing);
     addEventListener("blur", () => root.classList.remove("cursor-visible"));
     document.addEventListener("mouseleave", () => root.classList.remove("cursor-visible"));
   }
