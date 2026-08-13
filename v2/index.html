@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-skin="stage" data-throw="sling">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#07060a">
+  <meta name="description" content="抛硬币 v2 — 一枚可换装的硬币舞台。TOP 或月，由你抛出。">
+  <meta property="og:title" content="抛硬币 · v2">
+  <meta property="og:description" content="全屏舞台。四种气质，三种抛法。抛起见顶。">
+  <meta property="og:type" content="website">
+  <title>抛硬币 · v2 | paoyingbi.top</title>
+  <link rel="icon" href="/icons/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+  <link rel="preload" href="./assets/fonts/instrument-serif-400.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="./assets/fonts/outfit-500.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="./assets/v2.css?v=20260813e">
+  <script>
+    try {
+      var s = localStorage.getItem("pyb-v2-skin");
+      var t = localStorage.getItem("pyb-v2-throw");
+      if (s) document.documentElement.dataset.skin = s;
+      if (t) document.documentElement.dataset.throw = t;
+      else if (matchMedia("(pointer: coarse)").matches) document.documentElement.dataset.throw = "slap";
+    } catch (_) {}
+  </script>
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+  <div class="atmosphere" aria-hidden="true">
+    <i class="spot"></i>
+    <i class="haze"></i>
+    <i class="grid"></i>
+    <i class="lantern lantern-l"></i>
+    <i class="lantern lantern-r"></i>
+  </div>
+  <canvas class="fx" id="fx" aria-hidden="true"></canvas>
+
+  <header class="topbar">
+    <a class="brand" href="/v2/" aria-label="抛硬币 v2">
+      <span class="brand-coin" aria-hidden="true">TOP</span>
+      <span class="brand-copy">
+        <strong>抛硬币</strong>
+        <small>paoyingbi.top · v2</small>
+      </span>
+    </a>
+
+    <div class="desk-controls">
+      <div class="seg" role="radiogroup" aria-label="皮肤">
+        <button type="button" class="seg-btn" data-skin="stage" role="radio" aria-checked="true">舞台</button>
+        <button type="button" class="seg-btn" data-skin="arcade" role="radio" aria-checked="false">戏厅</button>
+        <button type="button" class="seg-btn" data-skin="crystal" role="radio" aria-checked="false">晶体</button>
+        <button type="button" class="seg-btn" data-skin="paper" role="radio" aria-checked="false">纸戏</button>
+      </div>
+      <div class="seg" role="radiogroup" aria-label="抛法">
+        <button type="button" class="seg-btn" data-throw="sling" role="radio" aria-checked="true">弹弓</button>
+        <button type="button" class="seg-btn" data-throw="slap" role="radio" aria-checked="false">拍桌</button>
+        <button type="button" class="seg-btn" data-throw="fling" role="radio" aria-checked="false">甩出</button>
+      </div>
+      <div class="icon-row">
+        <button class="icon-btn" id="sound-btn" type="button" aria-pressed="true" title="音效" aria-label="音效">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4h3.2L12 18V6L7.2 10H4Z"/><path d="M16 9.2a3.6 3.6 0 0 1 0 5.6M18.6 7a7 7 0 0 1 0 10"/></svg>
+        </button>
+        <button class="icon-btn" id="music-btn" type="button" aria-pressed="false" title="音乐" aria-label="背景音乐">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V6.4l10-2.2V16"/><circle cx="7" cy="18" r="2.2"/><circle cx="17" cy="16" r="2.2"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <button class="icon-btn menu-fab" id="menu-fab" type="button" aria-expanded="false" aria-controls="sheet" aria-label="打开设置">妆</button>
+  </header>
+
+  <main class="stage" id="stage">
+    <svg class="sling-svg" id="sling-svg" aria-hidden="true">
+      <path id="sling-band" d="" />
+    </svg>
+
+    <div class="dais" aria-hidden="true">
+      <i class="dais-ring"></i>
+      <i class="dais-plate"></i>
+    </div>
+    <div class="coin-shadow" id="coin-shadow" aria-hidden="true"></div>
+
+    <button class="coin-hit" id="coin-hit" type="button" aria-label="抛硬币">
+      <span class="coin" id="coin">
+        <span class="coin-edge" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+        <span class="coin-face coin-heads">
+          <span class="coin-metal"></span>
+          <span class="coin-rim"></span>
+          <span class="coin-lathe"></span>
+          <span class="coin-hole" aria-hidden="true"></span>
+          <span class="coin-code code-left">PAO · 26</span>
+          <span class="coin-code code-right">YINGBI · 01</span>
+          <span class="coin-sheen"></span>
+          <i class="glyph spark">✦</i>
+          <strong>TOP</strong>
+          <small>正面 · LUCKY SIDE</small>
+        </span>
+        <span class="coin-face coin-tails">
+          <span class="coin-metal"></span>
+          <span class="coin-rim"></span>
+          <span class="coin-lathe"></span>
+          <span class="coin-hole" aria-hidden="true"></span>
+          <span class="coin-code code-left">QUIET · 26</span>
+          <span class="coin-code code-right">MOON · 02</span>
+          <span class="coin-sheen"></span>
+          <i class="glyph moon">☾</i>
+          <strong>月</strong>
+          <small>反面 · QUIET SIDE</small>
+        </span>
+      </span>
+    </button>
+
+    <p class="hint" id="hint">按住拉开 · 松手抛出</p>
+    <div class="charge" id="charge" hidden><i></i></div>
+  </main>
+
+  <div class="titlecard" id="titlecard" aria-live="polite" aria-atomic="true">
+    <span class="titlecard-kicker" id="title-kicker"></span>
+    <strong class="titlecard-mark" id="title-mark"></strong>
+    <em class="titlecard-line" id="title-line"></em>
+  </div>
+  <div class="combo" id="combo" aria-hidden="true">COMBO <b>3</b></div>
+  <div class="seal" id="seal" aria-hidden="true">运</div>
+
+  <footer class="hud">
+    <div class="hud-stats">
+      <span><b id="stat-total">—</b><small>累计抛掷</small></span>
+      <span><b id="stat-ratio">—</b><small>TOP 占比</small></span>
+    </div>
+    <div class="hud-history" id="history" aria-label="最近抛掷"></div>
+    <a class="hud-back" href="/">← 经典站</a>
+  </footer>
+
+  <aside class="sheet" id="sheet" hidden>
+    <div class="sheet-handle"></div>
+    <p class="sheet-label">皮肤</p>
+    <div class="seg stacked" role="radiogroup" aria-label="皮肤">
+      <button type="button" class="seg-btn" data-skin="stage" role="radio">舞台</button>
+      <button type="button" class="seg-btn" data-skin="arcade" role="radio">戏厅</button>
+      <button type="button" class="seg-btn" data-skin="crystal" role="radio">晶体</button>
+      <button type="button" class="seg-btn" data-skin="paper" role="radio">纸戏</button>
+    </div>
+    <p class="sheet-label">抛法</p>
+    <div class="seg stacked" role="radiogroup" aria-label="抛法">
+      <button type="button" class="seg-btn" data-throw="sling" role="radio">弹弓</button>
+      <button type="button" class="seg-btn" data-throw="slap" role="radio">拍桌</button>
+      <button type="button" class="seg-btn" data-throw="fling" role="radio">甩出</button>
+    </div>
+    <div class="icon-row sheet-icons">
+      <button class="icon-btn" id="sound-btn-m" type="button" aria-pressed="true">音效</button>
+      <button class="icon-btn" id="music-btn-m" type="button" aria-pressed="false">音乐</button>
+    </div>
+  </aside>
+  <div class="sheet-mask" id="sheet-mask" hidden></div>
+
+  <div class="cursor-dot" id="cursor-dot" aria-hidden="true"></div>
+  <div class="cursor-ring" id="cursor-ring" aria-hidden="true"></div>
+  <audio id="bgm" preload="none" playsinline loop></audio>
+  <script src="./assets/v2.js?v=20260813e"></script>
+</body>
+</html>
